@@ -11,7 +11,8 @@ cmds = [
 ]
 
 [phases.build]
-cmds = ["/opt/venv/bin/python manage.py collectstatic --noinput"]
+# collectstatic não usa a chave nem o banco; valores provisórios só se o build não receber as variáveis.
+cmds = ["DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-build-only-key-not-used-at-runtime} DATABASE_URL=${DATABASE_URL:-postgres://u:p@localhost/db} /opt/venv/bin/python manage.py collectstatic --noinput"]
 
 [start]
 cmd = "/opt/venv/bin/python manage.py migrate --noinput && exec /opt/venv/bin/python -m gunicorn agrodados.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 120"
