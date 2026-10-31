@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.environ.get("DJANGO_DEBUG", "0").lower() in {"1", "true", "yes"}
@@ -41,8 +42,23 @@ TEMPLATES = [{
     ]},
 }]
 WSGI_APPLICATION = "agrodados.wsgi.application"
-DATABASE_PATH = Path(os.environ.get("DJANGO_DATABASE_PATH", BASE_DIR / "db.sqlite3"))
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": DATABASE_PATH}}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=not DEBUG,
+        )
+    }
+else:
+    if not DEBUG and os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+        raise ImproperlyConfigured(
+            "Configure DATABASE_URL com um PostgreSQL persistente antes de iniciar no Render."
+        )
+    DATABASE_PATH = Path(os.environ.get("DJANGO_DATABASE_PATH", BASE_DIR / "db.sqlite3"))
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": DATABASE_PATH}}
 AUTH_PASSWORD_VALIDATORS = []
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Bahia"
@@ -50,12 +66,45 @@ USE_I18N = True
 USE_TZ = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media"))
+R2_STORAGE_SETTINGS = {
+    "access_key": os.environ.get("R2_ACCESS_KEY_ID"),
+    "secret_key": os.environ.get("R2_SECRET_ACCESS_KEY"),
+    "bucket_name": os.environ.get("R2_BUCKET_NAME"),
+    "endpoint_url": os.environ.get("R2_ENDPOINT_URL"),
+}
+R2_STORAGE_CONFIGURED = all(R2_STORAGE_SETTINGS.values())
+if any(R2_STORAGE_SETTINGS.values()) and not R2_STORAGE_CONFIGURED:
+    raise ImproperlyConfigured(
+        "Configure todas as variáveis R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, "
+        "R2_BUCKET_NAME e R2_ENDPOINT_URL."
+    )
+if not DEBUG and os.environ.get("RENDER_EXTERNAL_HOSTNAME") and not R2_STORAGE_CONFIGURED:
+    raise ImproperlyConfigured(
+        "Configure o armazenamento persistente R2 antes de iniciar no Render."
+    )
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": (
+            "storages.backends.s3.S3Storage"
+            if R2_STORAGE_CONFIGURED
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+        **(
+            {
+                "OPTIONS": {
+                    **R2_STORAGE_SETTINGS,
+                    "region_name": "auto",
+                    "default_acl": None,
+                    "querystring_auth": True,
+                    "file_overwrite": False,
+                }
+            }
+            if R2_STORAGE_CONFIGURED
+            else {}
+        ),
     },
     "staticfiles": {
         "BACKEND": (

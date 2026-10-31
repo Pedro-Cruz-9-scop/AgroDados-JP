@@ -43,12 +43,24 @@ O arquivo `.gitignore` exclui ambientes virtuais, segredos, banco SQLite, arquiv
 
 O workflow do GitHub Actions executa testes, checagem de migrações, coleta de arquivos estáticos e a verificação de produção ao enviar alterações ou abrir um pull request. Antes do primeiro commit, confira `git status` e confirme que `db.sqlite3`, `.venv/`, `venv/`, `.env` e `media/` não estão na lista.
 
-## Publicação no GitHub e Render
-Este projeto é uma aplicação Django; **GitHub Pages não executa Python, banco de dados ou autenticação**. Usar Pages causa o erro 404 ou deixa a aplicação sem funcionamento. Use o GitHub para armazenar o código e um serviço de hospedagem Python para executar o site.
+## Publicação gratuita no GitHub e Render
+Este projeto é uma aplicação Django; **GitHub Pages não executa Python, banco de dados ou autenticação**. Use o GitHub para armazenar o código e o Render para executar o site. O arquivo `render.yaml` configura um serviço Web gratuito, sem disco persistente.
 
-O arquivo `render.yaml` prepara a implantação no Render como Blueprint. Envie o repositório ao GitHub, crie um Blueprint no Render e conecte esse repositório. O Render instalará as dependências, coletará os arquivos estáticos, aplicará as migrações ao iniciar e gerará uma chave secreta para o serviço. Depois da primeira implantação, crie o primeiro usuário pelo Shell do serviço com `python manage.py createsuperuser`.
+O armazenamento local do Render é temporário: o serviço pode dormir por inatividade e os arquivos locais podem desaparecer ao reiniciar ou publicar uma nova versão. Por isso, a implantação exige um PostgreSQL externo e armazenamento de documentos externo. Sem eles, a aplicação recusa iniciar no Render em vez de aparentar que salvou dados que seriam perdidos.
 
-O Blueprint usa SQLite e um disco persistente para manter o banco e os documentos enviados após reinicializações e novas implantações. O disco persistente exige um serviço pago no Render e limita o aplicativo a uma única instância; confira os preços antes de confirmar a implantação. O banco publicado começa vazio: os dados do `db.sqlite3` local não são enviados ao GitHub nem copiados automaticamente para a hospedagem. O Blueprint define a versão de Python em `.python-version`.
+### Serviços externos necessários
+1. Crie um banco PostgreSQL no [Neon](https://neon.tech/), copie a connection string e configure-a como `DATABASE_URL` nas variáveis do serviço Render. Use a URL de conexão com SSL (`sslmode=require`). O Django continua usando SQLite localmente quando `DATABASE_URL` não está definida.
+2. Crie um bucket privado no [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/), crie uma chave de acesso com permissão de leitura e gravação nesse bucket e configure no Render:
+   - `R2_BUCKET_NAME`: nome do bucket;
+   - `R2_ENDPOINT_URL`: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`;
+   - `R2_ACCESS_KEY_ID` e `R2_SECRET_ACCESS_KEY`: credenciais da chave.
+   Os documentos continuam privados e são servidos pela rota autenticada do sistema.
+3. Envie o repositório ao GitHub, crie um Blueprint no Render e conecte o repositório. Preencha as variáveis secretas solicitadas antes do primeiro deploy. O Render instala as dependências, coleta os arquivos estáticos, aplica as migrações e gera `DJANGO_SECRET_KEY`.
+4. Após a implantação, crie o primeiro usuário pelo Shell do serviço: `python manage.py createsuperuser`.
+
+O plano gratuito tem limites, pode suspender o serviço e não oferece garantias de disponibilidade; os limites e condições dos provedores podem mudar. Verifique as condições atuais do [Render](https://render.com/pricing), [Neon](https://neon.tech/pricing) e [Cloudflare R2](https://developers.cloudflare.com/r2/pricing/) antes de publicar. O banco publicado começa vazio: o `db.sqlite3` local não é enviado nem copiado automaticamente. A versão de Python está em `.python-version`.
+
+Não publique segredos, o banco de dados local ou arquivos enviados. Configure as variáveis secretas somente no painel do Render, nunca no `render.yaml` ou em um commit.
 
 ## Produção
 Antes de hospedar o sistema, configure HTTPS e estas variáveis no ambiente de produção:
@@ -60,7 +72,7 @@ py manage.py check --deploy
 py manage.py collectstatic --noinput
 ```
 
-O SQLite incluído é apropriado para desenvolvimento e uma instância única. No Render, o Blueprint monta um disco persistente em `/var/data`, separando banco e documentos dos arquivos temporários da aplicação. Para escalar para várias instâncias, migre para um banco gerenciado e armazenamento compartilhado de documentos.
+O SQLite e o armazenamento de arquivos local são usados apenas no desenvolvimento. No Render, a aplicação usa PostgreSQL e R2; não adicione um disco persistente pago se a intenção for permanecer no plano gratuito.
 
 ## Indicadores
 O painel e os relatórios usam os registros cadastrados na conta. Não há estimativas de produtividade sem dados de produção informados.

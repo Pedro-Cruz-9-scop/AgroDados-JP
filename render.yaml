@@ -2,13 +2,10 @@ services:
   - type: web
     name: agrodados
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: python manage.py migrate --noinput && python -m gunicorn agrodados.wsgi:application --workers 1 --threads 4 --timeout 120
     healthCheckPath: /entrar/
-    disk:
-      name: agrodados-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: 3.14.8
@@ -18,7 +15,13 @@ services:
         generateValue: true
       - key: DJANGO_ALLOWED_HOSTS
         value: .onrender.com
-      - key: DJANGO_DATABASE_PATH
-        value: /var/data/db.sqlite3
-      - key: DJANGO_MEDIA_ROOT
-        value: /var/data/media
+      - key: DATABASE_URL
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_ENDPOINT_URL
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
