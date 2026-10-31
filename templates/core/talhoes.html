@@ -94,7 +94,7 @@
   </div>
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Talhão</th><th>Propriedade</th><th>Cultura</th><th>Área calculada</th><th>Ações</th></tr></thead>
+      <thead><tr><th>Talhão</th><th>Propriedade</th><th>Cultura</th><th>Área calculada</th><th class="row-actions-head">Ações</th></tr></thead>
       <tbody>
         {% for field in fields %}
         <tr>
@@ -102,13 +102,9 @@
           <td>{{ field.propriedade.nome }}</td>
           <td>{{ field.cultura|default:"—" }}</td>
           <td>{{ field.area_hectares }} ha</td>
-          <td>
-            <form method="post" class="delete-field-form">
-              {% csrf_token %}
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="talhao" value="{{ field.pk }}">
-              <button class="text-button" type="submit">Excluir</button>
-            </form>
+          <td class="row-actions">
+            {% url 'core:excluir_talhao' field.pk as del_url %}
+            {% include 'core/_delete_form.html' with action=del_url label=field.nome %}
           </td>
         </tr>
         {% empty %}

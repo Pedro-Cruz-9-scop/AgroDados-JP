@@ -33,6 +33,11 @@ py manage.py runserver
 
 Para produção, configure `DJANGO_DEBUG=0`, gere uma chave secreta exclusiva com `py -c "import secrets; print(secrets.token_urlsafe(50))"` e informe o resultado em `DJANGO_SECRET_KEY`; configure também os domínios em `DJANGO_ALLOWED_HOSTS`. Nunca publique segredos, o banco de dados local ou arquivos enviados por usuários.
 
+## Privacidade e acesso administrativo
+Cada usuário conectado vê e altera somente os registros da própria conta. Visitantes sem login não acessam as telas privadas nem os documentos enviados. O administrador pode consultar os usuários, e-mails, propriedades, talhões, insumos, atividades e documentos de todas as contas pelo painel `/admin/`; crie a conta administrativa com `py manage.py createsuperuser`.
+
+As senhas nunca são exibidas: o Django armazena hashes de senha, não a senha original. O administrador pode redefinir uma senha pelo painel, mas não consegue recuperar a senha atual. O histórico disponível para consulta inclui as atividades agrícolas cadastradas no sistema.
+
 ## Testes
 ```powershell
 py manage.py test
@@ -76,3 +81,6 @@ O SQLite e o armazenamento de arquivos local são usados apenas no desenvolvimen
 
 ## Indicadores
 O painel e os relatórios usam os registros cadastrados na conta. Não há estimativas de produtividade sem dados de produção informados.
+
+## Licença
+Distribuído sob a licença MIT. Veja o arquivo `LICENSE`.

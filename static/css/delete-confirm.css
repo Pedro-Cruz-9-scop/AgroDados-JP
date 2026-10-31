@@ -1,0 +1,81 @@
+.row-actions {
+    min-width: 170px;
+}
+
+td.row-actions,
+th:last-child.row-actions-head {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: #fbfdf9;
+    box-shadow: -8px 0 12px -8px rgba(30, 60, 30, .18);
+}
+
+th.row-actions-head {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: #eaf3e3;
+    box-shadow: -8px 0 12px -8px rgba(30, 60, 30, .18);
+}
+
+.row-delete-form {
+    display: grid;
+    margin: 0;
+}
+
+.row-delete-form .delete-confirmation[hidden] {
+    display: none;
+}
+
+.row-delete-form .delete-confirmation {
+    display: grid;
+    gap: 8px;
+    padding: 11px;
+    border: 1px solid #efd7d2;
+    border-radius: 10px;
+    background: #fffaf9;
+    box-shadow: 0 8px 22px rgba(80, 36, 30, .1);
+}
+
+.row-delete-form .delete-confirmation label {
+    display: grid;
+    gap: 5px;
+    color: #704b45;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.row-delete-form .delete-confirmation input {
+    width: 100%;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid #e6ccc6;
+    border-radius: 7px;
+    background: #fff;
+    color: #332522;
+}
+
+.row-delete-form .delete-confirmation > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.row-delete-form .btn {
+    min-width: 0;
+    justify-content: center;
+    white-space: normal;
+}
+
+.btn.ghost.row-delete-button {
+    border-color: #efd7d2;
+    background: #fff8f6;
+    color: #a64e43;
+}
+
+.btn.ghost.row-delete-button:hover {
+    border-color: #e6bdb5;
+    background: #fff0ed;
+    color: #8d352b;
+}

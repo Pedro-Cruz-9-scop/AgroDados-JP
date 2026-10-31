@@ -1,13 +1,23 @@
+import tempfile
 from datetime import date
 from decimal import Decimal
-import tempfile
+from io import BytesIO
+from pathlib import Path
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
-from .models import Atividade, DocumentoPropriedade, Insumo, Propriedade, Talhao
+from .models import (
+    Atividade,
+    DocumentoPropriedade,
+    Insumo,
+    PerfilUsuario,
+    Propriedade,
+    Talhao,
+)
 
 
 class ApplicationNavigationTests(TestCase):
@@ -57,6 +67,22 @@ class ApplicationNavigationTests(TestCase):
         ]:
             with self.subTest(route=route_name):
                 self.assertContains(response, reverse(route_name))
+
+    def test_agricultural_photos_and_shared_visual_theme_are_loaded(self):
+        dashboard = self.client.get(reverse('core:dashboard'))
+        self.assertContains(dashboard, 'css/refresh.css')
+        self.assertContains(dashboard, 'img/plantacao-campos.jpg')
+        self.assertContains(dashboard, 'Johny Goerend')
+
+        self.client.logout()
+        login_page = self.client.get(reverse('core:login'))
+        self.assertContains(login_page, 'css/refresh.css')
+        self.assertContains(login_page, 'Referência: Agro 5.0')
+        self.assertContains(login_page, 'https://networdagro.com.br/blog/agro-5-0/')
+
+        signup_page = self.client.get(reverse('core:cadastro'))
+        self.assertContains(signup_page, 'Criar conta')
+        self.assertContains(signup_page, 'Referência: Agro 5.0')
 
     def test_map_uses_an_in_map_layer_control(self):
         response = self.client.get(reverse('core:talhoes'))
@@ -108,6 +134,84 @@ class ApplicationNavigationTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, 'agro-teste')
         self.assertEqual(self.user.email, '')
+
+    def test_profile_photo_upload_is_displayed_in_profile_and_account_avatars(self):
+        image_buffer = BytesIO()
+        Image.new('RGB', (32, 32), color='green').save(image_buffer, format='PNG')
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                response = self.client.post(
+                    reverse('core:perfil'),
+                    {
+                        'acao': 'foto',
+                        'foto': SimpleUploadedFile(
+                            'foto-perfil.png',
+                            image_buffer.getvalue(),
+                            content_type='image/png',
+                        ),
+                    },
+                )
+
+                self.assertRedirects(response, reverse('core:perfil'))
+                user_profile = PerfilUsuario.objects.get(usuario=self.user)
+                self.assertTrue(user_profile.foto.name.startswith('fotos_perfil/'))
+                self.assertTrue(user_profile.foto.storage.exists(user_profile.foto.name))
+
+                profile_page = self.client.get(reverse('core:perfil'))
+                self.assertContains(profile_page, user_profile.foto.url)
+                self.assertContains(profile_page, 'Foto de perfil')
+                self.assertContains(profile_page, 'Remover foto')
+
+                dashboard_page = self.client.get(reverse('core:dashboard'))
+                self.assertContains(dashboard_page, user_profile.foto.url)
+
+    def test_profile_rejects_non_image_upload(self):
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                response = self.client.post(
+                    reverse('core:perfil'),
+                    {
+                        'acao': 'foto',
+                        'foto': SimpleUploadedFile(
+                            'foto.png',
+                            b'not an image',
+                            content_type='image/png',
+                        ),
+                    },
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'imagem')
+        self.assertFalse(PerfilUsuario.objects.get(usuario=self.user).foto)
+
+    def test_profile_photo_can_be_removed(self):
+        image_buffer = BytesIO()
+        Image.new('RGB', (32, 32), color='blue').save(image_buffer, format='PNG')
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                user_profile = PerfilUsuario.objects.create(usuario=self.user)
+                user_profile.foto.save(
+                    'foto-perfil.png',
+                    SimpleUploadedFile(
+                        'foto-perfil.png', image_buffer.getvalue(), content_type='image/png'
+                    ),
+                )
+                photo_name = user_profile.foto.name
+
+                response = self.client.post(
+                    reverse('core:perfil'),
+                    {
+                        'acao': 'foto',
+                        'remover_foto': '1',
+                    },
+                )
+
+                self.assertRedirects(response, reverse('core:perfil'))
+                user_profile.refresh_from_db()
+                self.assertFalse(user_profile.foto)
+                self.assertFalse(user_profile.foto.storage.exists(photo_name))
 
     def test_reports_show_real_data_tables_and_supported_report_types(self):
         response = self.client.get(reverse('core:relatorios'))
@@ -199,11 +303,11 @@ class ApplicationNavigationTests(TestCase):
 
         self.assertContains(
             response,
-            f"{reverse('core:documentos')}?propriedade={self.property.pk}",
+            f'{reverse("core:documentos")}?propriedade={self.property.pk}',
         )
         self.assertContains(
             response,
-            f"{reverse('core:atividades')}?propriedade=Fazenda%20Boa%20Vista",
+            f'{reverse("core:atividades")}?propriedade=Fazenda%20Boa%20Vista',
         )
 
         activity_response = self.client.get(
@@ -241,6 +345,52 @@ class ApplicationNavigationTests(TestCase):
         self.assertEqual(list(response.context['documents']), [first_document])
         self.assertEqual(response.context['selected_property'], self.property)
 
+    def test_document_categories_have_distinct_identification_logos(self):
+        categories = ['CAR', 'CCIR', 'ITR', 'Comodato', 'Escritura', 'Outro']
+        for category in categories:
+            DocumentoPropriedade.objects.create(
+                propriedade=self.property,
+                categoria=category,
+                titulo=f'Documento {category}',
+                arquivo=f'documentos/{category.lower()}.pdf',
+            )
+
+        response = self.client.get(reverse('core:documentos'))
+
+        self.assertContains(response, 'data-document-category-select')
+        self.assertContains(response, 'data-document-category-preview')
+        self.assertContains(response, 'class="activity-list document-grid"')
+        self.assertContains(response, 'class="activity-row document-card"')
+        self.assertContains(response, 'class="document-actions"')
+        self.assertContains(response, 'data-logo-zoom')
+        self.assertContains(response, 'aria-haspopup="dialog"')
+        self.assertContains(response, 'data-logo-lightbox')
+        self.assertContains(response, 'data-logo-lightbox-image')
+        self.assertContains(response, 'data-open-delete')
+        self.assertContains(response, 'name="password"')
+        self.assertContains(response, 'autocomplete="current-password"')
+        self.assertContains(response, 'data-logo-src-car="/static/img/logo-car.png?v=2"')
+        self.assertContains(response, 'alt="Logo do CAR"')
+        self.assertContains(response, 'data-logo-src-ccir="/static/img/logo-ccir.png"')
+        self.assertContains(response, 'alt="Logo do CCIR"')
+        self.assertContains(response, 'data-logo-src-comodato="/static/img/logo-comodato.png"')
+        self.assertContains(response, 'alt="Logo do Comodato"')
+        self.assertContains(response, 'data-logo-src-escritura="/static/img/logo-escritura.png"')
+        self.assertContains(response, 'alt="Logo da Escritura"')
+        self.assertContains(response, 'data-logo-src-itr="/static/img/logo-itr.png"')
+        self.assertContains(response, 'alt="Logo do ITR"')
+        self.assertContains(response, 'data-logo-src-outro="/static/img/logo-outro.png"')
+        self.assertContains(response, 'alt="Logo OUT"')
+        for category in categories:
+            with self.subTest(category=category):
+                self.assertContains(response, f'data-document-category="{category}"')
+        self.assertContains(response, 'document-type-logo--car')
+        self.assertContains(response, 'document-type-logo--ccir')
+        self.assertContains(response, 'document-type-logo--itr')
+        self.assertContains(response, 'document-type-logo--comodato')
+        self.assertContains(response, 'document-type-logo--escritura')
+        self.assertContains(response, 'document-type-logo--outro')
+
     def test_document_download_requires_an_authenticated_owner(self):
         other_user = User.objects.create_user(
             username='dono-do-documento',
@@ -268,6 +418,7 @@ class ApplicationNavigationTests(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(b''.join(response.streaming_content), b'%PDF-1.4 test document')
                 self.assertIn('attachment;', response['Content-Disposition'])
+                self.assertEqual(self.client.get(document.arquivo.url).status_code, 404)
 
                 self.client.force_login(other_user)
                 self.assertEqual(self.client.get(url).status_code, 404)
@@ -278,6 +429,193 @@ class ApplicationNavigationTests(TestCase):
                     f'{reverse("core:login")}?next={url}',
                 )
 
+                admin_user = User.objects.create_superuser(
+                    username='administrador',
+                    email='admin@example.com',
+                    password='senha-de-administrador-123',
+                )
+                self.client.force_login(admin_user)
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(b''.join(response.streaming_content), b'%PDF-1.4 test document')
+
+    def _create_input(self, user=None):
+        return Insumo.objects.create(
+            proprietario=user or self.user,
+            nome='Adubo para excluir',
+            categoria='Fertilizante',
+            quantidade=10,
+            unidade='kg',
+        )
+
+    def test_input_owner_can_delete_with_correct_password(self):
+        item = self._create_input()
+        response = self.client.post(
+            reverse('core:excluir_insumo', args=[item.pk]),
+            {'password': 'senha-de-teste-123'},
+        )
+        self.assertRedirects(response, reverse('core:insumos'))
+        self.assertFalse(Insumo.objects.filter(pk=item.pk).exists())
+
+    def test_input_is_kept_with_wrong_password_get_or_other_user(self):
+        item = self._create_input()
+        url = reverse('core:excluir_insumo', args=[item.pk])
+        self.client.post(url, {'password': 'errada'})
+        self.assertTrue(Insumo.objects.filter(pk=item.pk).exists())
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        other = User.objects.create_user(username='outro', password='outra-senha-123')
+        self.client.force_login(other)
+        response = self.client.post(url, {'password': 'outra-senha-123'})
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Insumo.objects.filter(pk=item.pk).exists())
+
+    def test_document_owner_can_delete_document_and_uploaded_file(self):
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                document = DocumentoPropriedade.objects.create(
+                    propriedade=self.property,
+                    categoria='CAR',
+                    titulo='CAR para excluir',
+                    arquivo=SimpleUploadedFile(
+                        'car-para-excluir.pdf',
+                        b'%PDF-1.4 test document',
+                        content_type='application/pdf',
+                    ),
+                )
+                file_path = document.arquivo.path
+                url = reverse(
+                    'core:excluir_documento',
+                    kwargs={'documento_id': document.pk},
+                )
+
+                response = self.client.post(
+                    url,
+                    {'password': 'senha-de-teste-123'},
+                )
+
+                self.assertRedirects(response, reverse('core:documentos'))
+                self.assertFalse(DocumentoPropriedade.objects.filter(pk=document.pk).exists())
+                self.assertFalse(Path(file_path).exists())
+
+    def test_document_cannot_be_deleted_by_another_user_or_with_get(self):
+        other_user = User.objects.create_user(
+            username='nao-dono-do-documento',
+            password='senha-de-teste-789',
+        )
+        document = DocumentoPropriedade.objects.create(
+            propriedade=self.property,
+            categoria='CAR',
+            titulo='CAR protegido',
+            arquivo='documentos/car-protegido.pdf',
+        )
+        url = reverse(
+            'core:excluir_documento',
+            kwargs={'documento_id': document.pk},
+        )
+
+        self.assertEqual(self.client.get(url).status_code, 405)
+
+        wrong_password_response = self.client.post(
+            url,
+            {'password': 'senha-incorreta'},
+        )
+        self.assertRedirects(wrong_password_response, reverse('core:documentos'))
+        self.assertTrue(DocumentoPropriedade.objects.filter(pk=document.pk).exists())
+        self.assertTrue(
+            any(
+                'Senha incorreta' in str(message)
+                for message in wrong_password_response.wsgi_request._messages
+            )
+        )
+
+        self.client.force_login(other_user)
+        self.assertEqual(
+            self.client.post(url, {'password': 'senha-de-teste-123'}).status_code,
+            404,
+        )
+        self.assertTrue(DocumentoPropriedade.objects.filter(pk=document.pk).exists())
+
+        self.client.logout()
+        self.assertRedirects(
+            self.client.post(url, {'password': 'senha-de-teste-123'}),
+            f'{reverse("core:login")}?next={url}',
+        )
+
+    def test_only_admins_can_see_all_records_in_the_admin_panel(self):
+        other_user = User.objects.create_user(
+            username='outra-conta',
+            email='outra@example.com',
+            password='senha-de-teste-789',
+        )
+        other_property = Propriedade.objects.create(
+            proprietario=other_user,
+            nome='Fazenda de outra conta',
+        )
+        Talhao.objects.create(
+            propriedade=other_property,
+            nome='Talhão de outra conta',
+            area_hectares=Decimal('2.00'),
+            limites=[[-13.85, -40.08], [-13.85, -40.07], [-13.86, -40.07]],
+        )
+        Insumo.objects.create(
+            proprietario=other_user,
+            nome='Insumo de outra conta',
+            categoria='Fertilizante',
+            quantidade=10,
+        )
+        Atividade.objects.create(
+            proprietario=other_user,
+            data=date(2026, 10, 1),
+            propriedade=other_property.nome,
+            talhao='Talhão de outra conta',
+            cultura='Milho',
+            tipo='Plantio',
+            responsavel='Equipe externa',
+        )
+        DocumentoPropriedade.objects.create(
+            propriedade=other_property,
+            categoria='CAR',
+            titulo='Documento de outra conta',
+            arquivo='documentos/privado.pdf',
+        )
+        admin_path = reverse('admin:core_propriedade_changelist')
+
+        response = self.client.get(admin_path)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('admin:login'), response['Location'])
+
+        admin_user = User.objects.create_superuser(
+            username='administrador',
+            email='admin@example.com',
+            password='senha-de-administrador-123',
+        )
+        self.client.force_login(admin_user)
+
+        admin_lists = (
+            ('propriedade', 'Fazenda de outra conta'),
+            ('talhao', 'Talhão de outra conta'),
+            ('insumo', 'Insumo de outra conta'),
+            ('atividade', 'Fazenda de outra conta'),
+            ('documentopropriedade', 'Documento de outra conta'),
+        )
+        for model_name, record in admin_lists:
+            with self.subTest(model=model_name):
+                response = self.client.get(reverse(f'admin:core_{model_name}_changelist'))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, record)
+
+        response = self.client.get(reverse('admin:auth_user_changelist'))
+        self.assertContains(response, other_user.email)
+
+        response = self.client.get(admin_path)
+        self.assertContains(response, self.property.nome)
+        self.assertContains(response, other_property.nome)
+
+        response = self.client.get(reverse('core:propriedades'))
+        self.assertContains(response, self.property.nome)
+        self.assertNotContains(response, other_property.nome)
+
     def test_map_saves_field_boundaries_and_calculates_area(self):
         response = self.client.post(
             reverse('core:talhoes'),
@@ -286,10 +624,7 @@ class ApplicationNavigationTests(TestCase):
                 'propriedade': self.property.pk,
                 'nome': 'Talhão Norte',
                 'cultura': 'Soja',
-                'limites': (
-                    '[[-13.85,-40.08],[-13.85,-40.07],'
-                    '[-13.86,-40.07],[-13.86,-40.08]]'
-                ),
+                'limites': ('[[-13.85,-40.08],[-13.85,-40.07],[-13.86,-40.07],[-13.86,-40.08]]'),
             },
         )
 
@@ -382,19 +717,44 @@ class ApplicationNavigationTests(TestCase):
         )
 
         response = self.client.post(
-            reverse('core:talhoes'),
-            {'action': 'delete', 'talhao': other_field.pk},
+            reverse('core:excluir_talhao', args=[other_field.pk]),
+            {'password': 'senha-de-teste-123'},
         )
 
-        self.assertRedirects(response, reverse('core:talhoes'))
+        self.assertEqual(response.status_code, 404)
         self.assertTrue(Talhao.objects.filter(pk=own_field.pk).exists())
         self.assertTrue(Talhao.objects.filter(pk=other_field.pk).exists())
 
-        self.client.post(
-            reverse('core:talhoes'),
-            {'action': 'delete', 'talhao': own_field.pk},
-        )
+        own_url = reverse('core:excluir_talhao', args=[own_field.pk])
+        self.client.post(own_url, {'password': 'errada'})
+        self.assertTrue(Talhao.objects.filter(pk=own_field.pk).exists())
+        self.client.post(own_url, {'password': 'senha-de-teste-123'})
         self.assertFalse(Talhao.objects.filter(pk=own_field.pk).exists())
+
+    def test_property_and_activity_need_password_to_be_deleted(self):
+        activity = Atividade.objects.create(
+            proprietario=self.user,
+            data=date(2026, 10, 1),
+            propriedade=self.property.nome,
+            talhao='T1',
+            cultura='Soja',
+            tipo='Plantio',
+            responsavel='Ana',
+        )
+        cases = [
+            (reverse('core:excluir_atividade', args=[activity.pk]), Atividade, activity.pk),
+            (
+                reverse('core:excluir_propriedade', args=[self.property.pk]),
+                Propriedade,
+                self.property.pk,
+            ),
+        ]
+        for url, model, pk in cases:
+            self.assertEqual(self.client.get(url).status_code, 405)
+            self.client.post(url, {'password': 'errada'})
+            self.assertTrue(model.objects.filter(pk=pk).exists())
+            self.client.post(url, {'password': 'senha-de-teste-123'})
+            self.assertFalse(model.objects.filter(pk=pk).exists())
 
     def test_logout_clears_session_and_allows_login_with_another_account(self):
         self.assertContains(

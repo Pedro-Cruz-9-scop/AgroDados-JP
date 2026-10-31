@@ -2,8 +2,22 @@ from django.conf import settings
 from django.db import models
 
 
+class PerfilUsuario(models.Model):
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='perfil_agro',
+    )
+    foto = models.ImageField(upload_to='fotos_perfil/%Y/%m/', blank=True)
+
+    def __str__(self):
+        return f'Perfil de {self.usuario.username}'
+
+
 class Propriedade(models.Model):
-    proprietario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='propriedades')
+    proprietario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='propriedades'
+    )
     nome = models.CharField(max_length=120)
     municipio = models.CharField(max_length=120, blank=True)
     area_hectares = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -38,7 +52,9 @@ class Talhao(models.Model):
 
 
 class Insumo(models.Model):
-    proprietario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='insumos')
+    proprietario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='insumos'
+    )
     nome = models.CharField(max_length=120)
     categoria = models.CharField(max_length=80)
     quantidade = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -55,11 +71,16 @@ class Insumo(models.Model):
 
 class Atividade(models.Model):
     TIPO = [
-        ('Plantio', 'Plantio'), ('Adubação', 'Adubação'),
-        ('Defensivo', 'Aplicação de defensivo'), ('Irrigação', 'Irrigação'),
-        ('Colheita', 'Colheita'), ('Análise', 'Análise de solo'),
+        ('Plantio', 'Plantio'),
+        ('Adubação', 'Adubação'),
+        ('Defensivo', 'Aplicação de defensivo'),
+        ('Irrigação', 'Irrigação'),
+        ('Colheita', 'Colheita'),
+        ('Análise', 'Análise de solo'),
     ]
-    proprietario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='atividades')
+    proprietario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='atividades'
+    )
     data = models.DateField()
     propriedade = models.CharField(max_length=120)
     talhao = models.CharField(max_length=80)
@@ -78,9 +99,19 @@ class Atividade(models.Model):
     def __str__(self):
         return f'{self.tipo} — {self.talhao}'
 
+
 class DocumentoPropriedade(models.Model):
-    CATEGORIAS = [('CAR','CAR'),('CCIR','CCIR'),('ITR','ITR'),('Comodato','Contrato de comodato'),('Escritura','Escritura / matrícula'),('Outro','Outro')]
-    propriedade = models.ForeignKey(Propriedade, on_delete=models.CASCADE, related_name='documentos')
+    CATEGORIAS = [
+        ('CAR', 'CAR'),
+        ('CCIR', 'CCIR'),
+        ('ITR', 'ITR'),
+        ('Comodato', 'Contrato de comodato'),
+        ('Escritura', 'Escritura / matrícula'),
+        ('Outro', 'Outro'),
+    ]
+    propriedade = models.ForeignKey(
+        Propriedade, on_delete=models.CASCADE, related_name='documentos'
+    )
     categoria = models.CharField(max_length=30, choices=CATEGORIAS)
     titulo = models.CharField(max_length=160)
     arquivo = models.FileField(upload_to='documentos_propriedades/%Y/%m/')

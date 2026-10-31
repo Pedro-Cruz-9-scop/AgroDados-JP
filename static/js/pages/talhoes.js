@@ -352,14 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
     saveButton.textContent = "Salvando...";
   });
 
-  document.querySelectorAll(".delete-field-form").forEach(form => {
-    form.addEventListener("submit", event => {
-      if (!window.confirm("Deseja realmente excluir este talhão e seu limite no mapa?")) {
-        event.preventDefault();
-      }
-    });
-  });
-
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;",

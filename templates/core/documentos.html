@@ -1,17 +1,52 @@
-{% extends "base.html" %}{% block title %}Documentação{% endblock %}{% block breadcrumb %}Documentação da propriedade{% endblock %}
+{% extends "base.html" %}{% load static %}{% block title %}Documentação{% endblock %}{% block breadcrumb %}Documentação da propriedade{% endblock %}
 {% block content %}
 <div class="page-heading"><div><span class="eyebrow">ARQUIVO RURAL DIGITAL</span><h1>Documentação da propriedade</h1><p>Centralize CAR, CCIR, ITR, contratos e demais arquivos de cada imóvel.</p></div></div>
-<div class="dashboard-grid">
+<div class="dashboard-grid documents-layout">
 <section class="panel"><div class="panel-heading"><div><span class="eyebrow">NOVO ARQUIVO</span><h2>Adicionar documento</h2><p>PDF, JPG ou PNG • até 15 MB</p></div></div>
-<form method="post" enctype="multipart/form-data" class="form-grid">{% csrf_token %}
+<form method="post" enctype="multipart/form-data" class="form-grid document-upload-form">{% csrf_token %}
 <label>Propriedade<select name="propriedade" required><option value="">Selecione</option>{% for p in properties %}<option value="{{ p.id }}" {% if selected_property.pk == p.pk %}selected{% endif %}>{{ p.nome }} — {{ p.municipio }}</option>{% endfor %}</select></label>
-<label>Tipo de documento<select name="categoria"><option>CAR</option><option>CCIR</option><option>ITR</option><option>Comodato</option><option>Escritura</option><option>Outro</option></select></label>
+<label>Tipo de documento<select name="categoria" data-document-category-select><option value="CAR">CAR</option><option value="CCIR">CCIR</option><option value="ITR">ITR</option><option value="Comodato">Comodato</option><option value="Escritura">Escritura</option><option value="Outro">Outro</option></select><span class="document-category-preview" data-document-category-preview aria-live="polite"><span class="document-type-logo document-type-logo--car" data-document-category-logo data-logo-src-car="{% static 'img/logo-car.png' %}?v=2" data-logo-src-ccir="{% static 'img/logo-ccir.png' %}" data-logo-src-comodato="{% static 'img/logo-comodato.png' %}" data-logo-src-escritura="{% static 'img/logo-escritura.png' %}" data-logo-src-itr="{% static 'img/logo-itr.png' %}" data-logo-src-outro="{% static 'img/logo-outro.png' %}">CAR</span><span data-document-category-label>Cadastro Ambiental Rural</span></span></label>
 <label class="full">Nome / identificação<input name="titulo" placeholder="Ex.: CAR Fazenda Boa Vista"></label>
 <label>Número do documento<input name="numero" placeholder="Número ou protocolo"></label>
 <label>Data de emissão<input type="date" name="emitido_em"></label><label>Validade<input type="date" name="validade"></label>
 <label class="full">Arquivo<input type="file" name="arquivo" accept=".pdf,.jpg,.jpeg,.png" required></label>
 <label class="full">Observações<textarea name="observacoes" rows="3" placeholder="Informações adicionais"></textarea></label>
 <div class="full"><button class="btn primary" type="submit">＋ Anexar documento</button></div></form></section>
-<section class="panel"><div class="panel-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h2>Documentos cadastrados</h2><p>{{ documents|length }} arquivo(s) armazenado(s)</p></div></div>
-<div class="activity-list">{% for d in documents %}<div class="activity-row"><div class="metric-icon green">▤</div><div class="activity-info"><b>{{ d.titulo }}</b><span>{{ d.get_categoria_display }} · {{ d.propriedade.nome }}{% if d.numero %} · Nº {{ d.numero }}{% endif %}</span><small>Enviado em {{ d.enviado_em|date:"d/m/Y" }}{% if d.validade %} · Validade {{ d.validade|date:"d/m/Y" }}{% endif %}</small></div><a class="btn ghost" href="{% url 'core:download_documento' d.pk %}">Baixar ↧</a></div>{% empty %}<p class="fine-print">{% if selected_property %}Nenhum documento cadastrado para {{ selected_property.nome }}.{% else %}Nenhum documento anexado. Adicione o primeiro arquivo pelo formulário.{% endif %}</p>{% endfor %}</div></section></div>
+<section class="panel documents-panel"><div class="panel-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h2>Documentos cadastrados</h2><p>{{ documents|length }} arquivo(s) armazenado(s)</p></div></div>
+<div class="activity-list document-grid">
+{% for d in documents %}
+<article class="activity-row document-card">
+  <div class="document-card-heading">
+    <span>{{ d.get_categoria_display }}</span>
+    <b>{{ d.titulo }}</b>
+  </div>
+  {% if d.categoria == 'CAR' %}<button class="document-type-logo document-type-logo--car" type="button" data-logo-zoom aria-label="Ampliar logo do CAR" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-car.png' %}?v=2" alt="Logo do CAR"></button>{% elif d.categoria == 'CCIR' %}<button class="document-type-logo document-type-logo--ccir" type="button" data-logo-zoom aria-label="Ampliar logo do CCIR" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-ccir.png' %}" alt="Logo do CCIR"></button>{% elif d.categoria == 'Comodato' %}<button class="document-type-logo document-type-logo--comodato" type="button" data-logo-zoom aria-label="Ampliar logo do Comodato" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-comodato.png' %}" alt="Logo do Comodato"></button>{% elif d.categoria == 'Escritura' %}<button class="document-type-logo document-type-logo--escritura" type="button" data-logo-zoom aria-label="Ampliar logo da Escritura" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-escritura.png' %}" alt="Logo da Escritura"></button>{% elif d.categoria == 'ITR' %}<button class="document-type-logo document-type-logo--itr" type="button" data-logo-zoom aria-label="Ampliar logo do ITR" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-itr.png' %}" alt="Logo do ITR"></button>{% elif d.categoria == 'Outro' %}<button class="document-type-logo document-type-logo--outro" type="button" data-logo-zoom aria-label="Ampliar logo OUT" aria-haspopup="dialog" data-document-category="{{ d.categoria }}"><img src="{% static 'img/logo-outro.png' %}" alt="Logo OUT"></button>{% else %}<div class="document-type-logo document-type-logo--{{ d.categoria|lower }}" data-document-category="{{ d.categoria }}" aria-label="Identificação do documento: {{ d.get_categoria_display }}">{{ d.categoria }}</div>{% endif %}
+  <div class="activity-info">
+    <small>{{ d.propriedade.nome }}{% if d.numero %} · Nº {{ d.numero }}{% endif %}</small>
+    <small>Enviado em {{ d.enviado_em|date:"d/m/Y" }}{% if d.validade %} · Validade {{ d.validade|date:"d/m/Y" }}{% endif %}</small>
+  </div>
+  <div class="document-actions">
+    <a class="btn ghost" href="{% url 'core:download_documento' d.pk %}">Baixar ↧</a>
+    <form method="post" action="{% url 'core:excluir_documento' d.pk %}" class="delete-document-form" data-delete-document-form>
+      {% csrf_token %}
+      <button class="btn ghost delete-document-button" type="button" data-open-delete aria-expanded="false" aria-label="Excluir {{ d.titulo }}">Excluir</button>
+      <div class="delete-confirmation" data-delete-confirmation hidden>
+        <label>Confirme sua senha<input type="password" name="password" autocomplete="current-password" required></label>
+        <div>
+          <button class="btn ghost delete-document-button" type="submit">Confirmar exclusão</button>
+          <button class="btn ghost" type="button" data-cancel-delete>Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</article>
+{% empty %}
+<p class="fine-print">{% if selected_property %}Nenhum documento cadastrado para {{ selected_property.nome }}.{% else %}Nenhum documento anexado. Adicione o primeiro arquivo pelo formulário.{% endif %}</p>
+{% endfor %}
+</div>
+<dialog class="logo-lightbox" data-logo-lightbox aria-label="Visualização ampliada da logo">
+  <button class="logo-lightbox-close" type="button" data-close-logo-lightbox aria-label="Fechar visualização">×</button>
+  <img data-logo-lightbox-image alt="">
+</dialog>
+</section></div>
 {% endblock %}
