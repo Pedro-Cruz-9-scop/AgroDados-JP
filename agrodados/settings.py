@@ -95,7 +95,8 @@ TEMPLATES = [
     }
 ]
 WSGI_APPLICATION = 'agrodados.wsgi.application'
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# collectstatic não acessa o banco; ignorar a URL evita exigir o driver no build.
+DATABASE_URL = None if COLLECTSTATIC_RUN else os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
