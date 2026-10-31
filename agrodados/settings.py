@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -22,7 +23,13 @@ DEPLOYED_ON_SERVERLESS_HOST = DEPLOYED_ON_RENDER or DEPLOYED_ON_VERCEL or DEPLOY
 DEPLOYMENT_ERRORS = []
 
 
+# O build da hospedagem pode rodar collectstatic sem as variáveis de ambiente.
+COLLECTSTATIC_RUN = 'collectstatic' in sys.argv
+
+
 def config_error(message):
+    if COLLECTSTATIC_RUN:
+        return
     if DEPLOYED_ON_VERCEL:
         DEPLOYMENT_ERRORS.append(message)
     else:
