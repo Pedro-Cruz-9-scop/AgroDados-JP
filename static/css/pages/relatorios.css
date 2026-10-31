@@ -1,0 +1,10 @@
+.report-filter {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.report-kpi {
+    border: 1px solid rgba(123, 146, 177, 0.18);
+}

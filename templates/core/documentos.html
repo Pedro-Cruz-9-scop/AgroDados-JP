@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Documentação{% endblock %}{% block breadcrumb %}Documentação da propriedade{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">ARQUIVO RURAL DIGITAL</span><h1>Documentação da propriedade</h1><p>Centralize CAR, CCIR, ITR, contratos e demais arquivos de cada imóvel.</p></div></div>
+<div class="dashboard-grid">
+<section class="panel"><div class="panel-heading"><div><span class="eyebrow">NOVO ARQUIVO</span><h2>Adicionar documento</h2><p>PDF, JPG ou PNG • até 15 MB</p></div></div>
+<form method="post" enctype="multipart/form-data" class="form-grid">{% csrf_token %}
+<label>Propriedade<select name="propriedade" required><option value="">Selecione</option>{% for p in properties %}<option value="{{ p.id }}" {% if selected_property.pk == p.pk %}selected{% endif %}>{{ p.nome }} — {{ p.municipio }}</option>{% endfor %}</select></label>
+<label>Tipo de documento<select name="categoria"><option>CAR</option><option>CCIR</option><option>ITR</option><option>Comodato</option><option>Escritura</option><option>Outro</option></select></label>
+<label class="full">Nome / identificação<input name="titulo" placeholder="Ex.: CAR Fazenda Boa Vista"></label>
+<label>Número do documento<input name="numero" placeholder="Número ou protocolo"></label>
+<label>Data de emissão<input type="date" name="emitido_em"></label><label>Validade<input type="date" name="validade"></label>
+<label class="full">Arquivo<input type="file" name="arquivo" accept=".pdf,.jpg,.jpeg,.png" required></label>
+<label class="full">Observações<textarea name="observacoes" rows="3" placeholder="Informações adicionais"></textarea></label>
+<div class="full"><button class="btn primary" type="submit">＋ Anexar documento</button></div></form></section>
+<section class="panel"><div class="panel-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h2>Documentos cadastrados</h2><p>{{ documents|length }} arquivo(s) armazenado(s)</p></div></div>
+<div class="activity-list">{% for d in documents %}<div class="activity-row"><div class="metric-icon green">▤</div><div class="activity-info"><b>{{ d.titulo }}</b><span>{{ d.get_categoria_display }} · {{ d.propriedade.nome }}{% if d.numero %} · Nº {{ d.numero }}{% endif %}</span><small>Enviado em {{ d.enviado_em|date:"d/m/Y" }}{% if d.validade %} · Validade {{ d.validade|date:"d/m/Y" }}{% endif %}</small></div><a class="btn ghost" href="{% url 'core:download_documento' d.pk %}">Baixar ↧</a></div>{% empty %}<p class="fine-print">{% if selected_property %}Nenhum documento cadastrado para {{ selected_property.nome }}.{% else %}Nenhum documento anexado. Adicione o primeiro arquivo pelo formulário.{% endif %}</p>{% endfor %}</div></section></div>
+{% endblock %}

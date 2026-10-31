@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mapas e talhões{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="{% static 'css/pages/talhoes.css' %}">
+{% endblock %}
+{% block breadcrumb %}Mapas e talhões{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">GESTÃO DA PROPRIEDADE</span>
+    <h1>Mapa e talhões</h1>
+    <p>Visualize sua região, desenhe os limites e acompanhe cada área de cultivo.</p>
+  </div>
+  <a class="btn primary" href="{% url 'propriedades' %}">＋ Cadastrar propriedade</a>
+</div>
+
+<div class="field-overview">
+  <section class="field-map panel">
+    <div class="map-heading">
+      <div>
+        <h2>Mapa da propriedade</h2>
+        <p>Busque um local e desenhe o perímetro do talhão diretamente no mapa.</p>
+      </div>
+    </div>
+    <form class="map-place-search" id="placeSearchForm">
+      <label for="placeSearchInput">Localizar uma cidade ou endereço</label>
+      <div class="map-place-search-controls">
+        <input id="placeSearchInput" type="search" placeholder="Ex.: Lisboa, Portugal" autocomplete="off">
+        <button class="btn secondary" id="placeSearchButton" type="submit">Buscar local</button>
+      </div>
+    </form>
+
+    <div id="agro-map" role="application" aria-label="Mapa interativo para desenhar talhões"></div>
+    <p class="map-status" id="mapStatus" role="status" aria-live="polite">Carregando mapa...</p>
+
+    <div class="map-toolbar">
+      <button class="btn ghost" id="locateMe" type="button">◎ Minha localização</button>
+      <button class="btn ghost" id="showWorld" type="button">Ver mapa mundial</button>
+      {% if properties %}
+        <button class="btn secondary" id="startDrawing" type="button">＋ Desenhar talhão</button>
+        <button class="btn ghost" id="undoPoint" type="button" disabled>↶ Desfazer ponto</button>
+        <button class="btn ghost" id="clearDrawing" type="button" disabled>Limpar desenho</button>
+      {% else %}
+        <button id="startDrawing" disabled class="btn secondary" type="button">＋ Desenhar talhão</button>
+      {% endif %}
+    </div>
+
+    {% if properties %}
+    <form class="field-form" id="fieldForm" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save">
+      <input type="hidden" name="limites" id="fieldCoordinates">
+      <label for="fieldProperty">Propriedade
+        <select id="fieldProperty" name="propriedade" required>
+          <option value="">Selecione uma propriedade</option>
+          {% for property in properties %}
+            <option value="{{ property.pk }}">{{ property.nome }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label for="fieldName">Nome do talhão
+        <input id="fieldName" name="nome" maxlength="80" required placeholder="Ex.: Talhão Norte">
+      </label>
+      <label for="fieldCulture">Cultura
+        <input id="fieldCulture" name="cultura" maxlength="80" placeholder="Ex.: Soja">
+      </label>
+      <div class="field-save">
+        <span id="areaPreview">0/3 pontos marcados para formar o limite.</span>
+        <button class="btn primary" id="saveField" type="submit" disabled>Salvar talhão</button>
+      </div>
+    </form>
+    {% else %}
+    <div class="map-empty-state">
+      <p>Cadastre uma propriedade para habilitar o desenho e salvar talhões no mapa.</p>
+      <a class="btn primary" href="{% url 'propriedades' %}">Cadastrar propriedade</a>
+    </div>
+    {% endif %}
+  </section>
+
+  <aside class="field-stats">
+    <div class="mini-stat"><small>Propriedades cadastradas</small><b>{{ properties|length }}</b><span>Na sua conta</span></div>
+    <div class="mini-stat"><small>Área das propriedades</small><b>{{ total_area }} <small>ha</small></b><span>Área total cadastrada</span></div>
+    <div class="mini-stat"><small>Talhões mapeados</small><b>{{ fields|length }}</b><span>Limites salvos no mapa</span></div>
+    <div class="mini-stat"><small>Atividades registradas</small><b>{{ activities|length }}</b><span>Histórico disponível</span></div>
+  </aside>
+</div>
+
+{{ saved_fields|json_script:"saved-fields-data" }}
+<section class="panel table-panel">
+  <div class="table-toolbar">
+    <div><h2>Talhões cadastrados</h2><p>Os limites salvos são exibidos no mapa e vinculados à sua propriedade.</p></div>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Talhão</th><th>Propriedade</th><th>Cultura</th><th>Área calculada</th><th>Ações</th></tr></thead>
+      <tbody>
+        {% for field in fields %}
+        <tr>
+          <td><b>{{ field.nome }}</b></td>
+          <td>{{ field.propriedade.nome }}</td>
+          <td>{{ field.cultura|default:"—" }}</td>
+          <td>{{ field.area_hectares }} ha</td>
+          <td>
+            <form method="post" class="delete-field-form">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="talhao" value="{{ field.pk }}">
+              <button class="text-button" type="submit">Excluir</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Nenhum talhão cadastrado. Use o mapa para desenhar e salvar o primeiro.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script defer src="{% static 'js/pages/talhoes.js' %}?v=4"></script>
+{% endblock %}

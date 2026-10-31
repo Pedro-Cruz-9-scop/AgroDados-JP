@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}AgroDados{% endblock %} | AgroDados</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<link rel="stylesheet" href="{% static 'css/branding.css' %}">
+{% if request.resolver_match.url_name == 'dashboard' %}<link rel="stylesheet" href="{% static 'css/pages/dashboard.css' %}">
+{% elif request.resolver_match.url_name == 'propriedades' %}<link rel="stylesheet" href="{% static 'css/pages/propriedades.css' %}">
+{% elif request.resolver_match.url_name == 'insumos' %}<link rel="stylesheet" href="{% static 'css/pages/insumos.css' %}">
+{% elif request.resolver_match.url_name == 'atividades' %}<link rel="stylesheet" href="{% static 'css/pages/atividades.css' %}">
+{% elif request.resolver_match.url_name == 'documentos' %}<link rel="stylesheet" href="{% static 'css/pages/documentos.css' %}">
+{% elif request.resolver_match.url_name == 'relatorios' %}<link rel="stylesheet" href="{% static 'css/pages/relatorios.css' %}">
+{% elif request.resolver_match.url_name == 'perfil' %}<link rel="stylesheet" href="{% static 'css/pages/perfil.css' %}">
+{% endif %}
+{% block extra_head %}{% endblock %}
+<script defer src="{% static 'js/app.js' %}"></script>
+</head>
+<body>
+{% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'cadastro' %}
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="{% url 'dashboard' %}"><img class="brand-logo" src="{% static 'img/logo-pedro-jefferson.png' %}" alt="Logo Pedro e Jefferson Agro"><span><b>AgroDados</b><small>Gestão & rastreabilidade agrícola</small></span></a>
+  <div class="workspace"><span class="workspace-dot"></span> GESTÃO RURAL INTEGRADA</div>
+  <nav class="nav">
+    <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span>▦</span> Visão geral</a>
+    <a class="{% if request.resolver_match.url_name == 'propriedades' %}active{% endif %}" href="{% url 'propriedades' %}"><span>⌂</span> Propriedades</a>
+    <a class="{% if request.resolver_match.url_name == 'talhoes' %}active{% endif %}" href="{% url 'talhoes' %}"><span>▧</span> Mapas e talhões</a>
+    <a class="{% if request.resolver_match.url_name == 'insumos' %}active{% endif %}" href="{% url 'insumos' %}"><span>♧</span> Produtos e insumos</a>
+    <a class="{% if request.resolver_match.url_name == 'atividades' %}active{% endif %}" href="{% url 'atividades' %}"><span>◷</span> Atividades agrícolas</a>
+    <a class="{% if request.resolver_match.url_name == 'documentos' %}active{% endif %}" href="{% url 'documentos' %}"><span>▤</span> Documentação</a>
+    <a class="{% if request.resolver_match.url_name == 'relatorios' %}active{% endif %}" href="{% url 'relatorios' %}"><span>▤</span> Relatórios</a>
+    <a class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}" href="{% url 'perfil' %}"><span>⚙</span> Meu perfil</a>
+  </nav>
+  <div class="sidebar-bottom"><div class="avatar">{{ request.user.username|first|upper }}</div><div class="user-mini"><b>{{ request.user.username }}</b><small>Conta conectada</small></div><form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button class="logout" type="submit" title="Sair da conta" aria-label="Sair da conta"><span aria-hidden="true">↗</span><span>Sair</span></button></form></div>
+</aside>
+<main class="main">
+<header class="topbar"><button class="mobile-menu" id="menuToggle" aria-label="Abrir menu">☰</button><div class="crumb">AgroDados <span>/</span> {% block breadcrumb %}Visão geral{% endblock %}</div><form class="top-search" method="get" action="{% url 'core:buscar' %}"><label class="sr-only" for="globalSearch">Buscar registros</label><input id="globalSearch" type="search" name="q" placeholder="Buscar por propriedade, talhão, cultura..." aria-label="Buscar por propriedade, talhão ou cultura"></form><div class="top-actions"><span class="live"><i></i> Sistema operacional</span><div class="top-user"><div class="avatar small">{{ request.user.username|first|upper }}</div><span><b>{{ request.user.username }}</b><small>Conta ativa</small></span></div><form method="post" action="{% url 'logout' %}" class="header-logout">{% csrf_token %}<button class="btn ghost" type="submit" aria-label="Sair da conta">Sair da conta <span aria-hidden="true">↗</span></button></form></div></header>
+{% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+<div class="page-content">{% block content %}{% endblock %}</div>
+<footer class="footer"><span>© 2026 AgroDados</span><span>Informação que fortalece o campo.</span><span>Gestão rural integrada</span></footer>
+</main></div>
+{% else %}{% if messages %}<div class="auth-messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% block auth_content %}{% endblock %}{% endif %}
+{% if request.resolver_match.url_name == 'dashboard' %}<script defer src="{% static 'js/pages/dashboard.js' %}"></script>
+{% elif request.resolver_match.url_name == 'documentos' %}<script defer src="{% static 'js/pages/documentos.js' %}"></script>
+{% elif request.resolver_match.url_name == 'relatorios' %}<script defer src="{% static 'js/pages/relatorios.js' %}"></script>
+{% elif request.resolver_match.url_name == 'perfil' %}<script defer src="{% static 'js/pages/perfil.js' %}"></script>
+{% elif request.resolver_match.url_name == 'login' or request.resolver_match.url_name == 'cadastro' %}<script defer src="{% static 'js/pages/auth.js' %}"></script>
+{% endif %}
+{% block extra_scripts %}{% endblock %}
+</body></html>

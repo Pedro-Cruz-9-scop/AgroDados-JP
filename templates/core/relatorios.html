@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Relatórios{% endblock %}
+{% block breadcrumb %}Relatórios{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">ANÁLISE E INTELIGÊNCIA</span><h1>Relatórios agrícolas</h1><p>Consulte e exporte os registros reais da sua operação.</p></div>
+  <button class="btn primary" id="exportCsv" type="button">⇩ Exportar CSV</button>
+</div>
+<div class="report-filter panel">
+  <label>Tipo de relatório
+    <select id="reportType">
+      <option value="activities">Atividades</option>
+      <option value="inputs">Insumos</option>
+      <option value="properties">Propriedades</option>
+    </select>
+  </label>
+  <label>Propriedade
+    <select id="reportProperty">
+      <option value="all">Todas as propriedades</option>
+      {% for property in properties %}<option value="{{ property.nome }}">{{ property.nome }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Período
+    <select id="reportPeriod">
+      <option value="all">Todo o histórico</option>
+      <option value="30">Últimos 30 dias</option>
+      <option value="90">Últimos 90 dias</option>
+    </select>
+  </label>
+  <label class="report-search">Buscar
+    <input id="reportSearch" type="search" placeholder="Filtrar resultados..." autocomplete="off">
+  </label>
+  <button class="btn secondary" id="applyReport" type="button">Aplicar filtros</button>
+</div>
+<div class="report-kpis">
+  <div class="report-kpi"><span>Registros de atividade</span><b>{{ activities|length }}</b><small>Na sua conta</small></div>
+  <div class="report-kpi"><span>Itens no inventário</span><b>{{ inputs|length }}</b><small>Produtos registrados</small></div>
+  <div class="report-kpi"><span>Propriedades</span><b>{{ properties|length }}</b><small>Unidades cadastradas</small></div>
+</div>
+<section class="panel table-panel">
+  <div class="table-toolbar"><div><h2 id="reportHeading">Atividades</h2><p id="reportResultCount" aria-live="polite"></p></div></div>
+  <div class="table-scroll">
+    <table id="reportTable" data-report-table="activities">
+      <thead><tr><th>Data</th><th>Propriedade</th><th>Talhão</th><th>Atividade</th><th>Produto</th><th>Responsável</th></tr></thead>
+      <tbody>
+        {% for activity in activities %}
+        <tr data-date="{{ activity.data|date:'Y-m-d' }}" data-property="{{ activity.propriedade }}">
+          <td>{{ activity.data|date:"d/m/Y" }}</td><td>{{ activity.propriedade }}</td><td>{{ activity.talhao }}</td><td>{{ activity.tipo }}</td><td>{{ activity.produto|default:"—" }}</td><td>{{ activity.responsavel }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="6">Nenhuma atividade registrada.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <table data-report-table="inputs" hidden>
+      <thead><tr><th>Produto</th><th>Categoria</th><th>Quantidade</th><th>Unidade</th><th>Observações</th></tr></thead>
+      <tbody>
+        {% for input in inputs %}
+        <tr><td>{{ input.nome }}</td><td>{{ input.categoria }}</td><td>{{ input.quantidade }}</td><td>{{ input.unidade }}</td><td>{{ input.observacoes|default:"—" }}</td></tr>
+        {% empty %}<tr><td colspan="5">Nenhum insumo registrado.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <table data-report-table="properties" hidden>
+      <thead><tr><th>Propriedade</th><th>Município</th><th>Área (ha)</th><th>Cultura</th><th>Responsável</th></tr></thead>
+      <tbody>
+        {% for property in properties %}
+        <tr><td>{{ property.nome }}</td><td>{{ property.municipio|default:"—" }}</td><td>{{ property.area_hectares }}</td><td>{{ property.cultura_principal|default:"—" }}</td><td>{{ property.responsavel|default:"—" }}</td></tr>
+        {% empty %}<tr><td colspan="5">Nenhuma propriedade cadastrada.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

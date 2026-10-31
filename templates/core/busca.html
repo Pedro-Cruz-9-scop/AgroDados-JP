@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Busca{% endblock %}
+{% block breadcrumb %}Busca no sistema{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <span class="eyebrow">PESQUISA INTEGRADA</span>
+    <h1>Buscar no AgroDados</h1>
+    <p>Encontre propriedades, talhões, atividades, insumos e documentos da sua conta.</p>
+  </div>
+</div>
+
+<form class="search-page-form panel" method="get" action="{% url 'core:buscar' %}">
+  <label for="search-query">O que você está procurando?</label>
+  <div class="search-page-control">
+    <input id="search-query" type="search" name="q" value="{{ query }}" placeholder="Ex.: Fazenda Boa Vista, soja, CAR..." autofocus>
+    <button class="btn primary" type="submit">Buscar</button>
+  </div>
+</form>
+
+{% if query %}
+  <div class="search-results-heading">
+    <h2>Resultados para “{{ query }}”</h2>
+    <span>{{ result_count }} resultado(s)</span>
+  </div>
+  {% if result_count %}
+    {% if properties %}
+      <section class="panel search-result-group">
+        <h3>Propriedades</h3>
+        {% for property in properties %}
+          <a class="search-result" href="{% url 'core:documentos' %}?propriedade={{ property.id }}">
+            <span class="metric-icon green">⌂</span>
+            <span><b>{{ property.nome }}</b><small>{{ property.municipio|default:"Município não informado" }} · {{ property.area_hectares }} ha</small></span>
+            <span class="text-link">Ver documentos →</span>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if fields %}
+      <section class="panel search-result-group">
+        <h3>Talhões</h3>
+        {% for field in fields %}
+          <a class="search-result" href="{% url 'core:talhoes' %}">
+            <span class="metric-icon green">▧</span>
+            <span><b>{{ field.nome }}</b><small>{{ field.propriedade.nome }} · {{ field.cultura|default:"Cultura não informada" }} · {{ field.area_hectares }} ha</small></span>
+            <span class="text-link">Ver mapa →</span>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if activities %}
+      <section class="panel search-result-group">
+        <h3>Atividades</h3>
+        {% for activity in activities %}
+          <a class="search-result" href="{% url 'core:atividades' %}?propriedade={{ activity.propriedade|urlencode }}">
+            <span class="metric-icon blue">◷</span>
+            <span><b>{{ activity.tipo }} · {{ activity.talhao }}</b><small>{{ activity.propriedade }} · {{ activity.cultura }} · {{ activity.data|date:"d/m/Y" }}</small></span>
+            <span class="text-link">Ver histórico →</span>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if inputs %}
+      <section class="panel search-result-group">
+        <h3>Produtos e insumos</h3>
+        {% for input in inputs %}
+          <a class="search-result" href="{% url 'core:insumos' %}?q={{ input.nome|urlencode }}">
+            <span class="metric-icon amber">♧</span>
+            <span><b>{{ input.nome }}</b><small>{{ input.categoria }} · {{ input.quantidade }} {{ input.unidade }}</small></span>
+            <span class="text-link">Abrir inventário →</span>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+    {% if documents %}
+      <section class="panel search-result-group">
+        <h3>Documentos</h3>
+        {% for document in documents %}
+          <a class="search-result" href="{% url 'core:documentos' %}?propriedade={{ document.propriedade_id }}">
+            <span class="metric-icon violet">▤</span>
+            <span><b>{{ document.titulo }}</b><small>{{ document.get_categoria_display }} · {{ document.propriedade.nome }}</small></span>
+            <span class="text-link">Abrir documentos →</span>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% else %}
+    <div class="panel empty-state">
+      <span class="metric-icon amber">⌕</span>
+      <h2>Nenhum resultado encontrado</h2>
+      <p>Tente outro nome de propriedade, cultura, talhão, produto ou documento.</p>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="panel empty-state">
+    <span class="metric-icon green">⌕</span>
+    <h2>Pesquise em todos os seus registros</h2>
+    <p>Os resultados ficam limitados aos dados vinculados à sua conta.</p>
+  </div>
+{% endif %}
+{% endblock %}

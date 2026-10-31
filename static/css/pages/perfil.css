@@ -1,0 +1,8 @@
+.profile-card {
+    overflow: hidden;
+}
+
+.profile-cover {
+    height: 112px;
+    background: linear-gradient(135deg, rgba(42, 132, 98, 0.22), rgba(10, 38, 31, 0.14));
+}
