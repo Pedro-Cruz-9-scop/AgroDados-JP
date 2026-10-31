@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgroDados | Gestão e rastreabilidade rural</title>
+<meta name="description" content="AgroDados: propriedades, talhões no mapa, insumos, atividades e documentos rurais em um só lugar.">
+<link rel="icon" type="image/png" href="static/img/favicon.png">
+<style>
+  :root { --verde:#1f5c2e; --escuro:#12281a; --claro:#eef5e9; --texto:#23332a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; color:var(--texto); background:#fbfdf9; line-height:1.55; }
+  a { color:var(--verde); }
+  .wrap { width:min(1080px, 92%); margin:0 auto; }
+  header { background:var(--escuro); color:#fff; }
+  header .wrap { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; }
+  .brand { display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.15rem; }
+  .brand img { width:44px; height:44px; border-radius:50%; object-fit:cover; }
+  header a.link { color:#cfe6c8; text-decoration:none; font-size:.95rem; }
+  .hero { position:relative; color:#fff; background:linear-gradient(rgba(18,40,26,.78), rgba(18,40,26,.78)), url("static/img/plantacao-campos.jpg") center/cover; }
+  .hero .wrap { padding:96px 0 88px; max-width:760px; margin-left:max(4%, calc((100% - 1080px)/2)); }
+  .hero small { letter-spacing:.14em; font-weight:600; color:#a9d7a0; }
+  .hero h1 { font-size:clamp(2rem, 5vw, 3.2rem); line-height:1.1; margin:.4em 0; }
+  .hero p { font-size:1.12rem; color:#e3efe0; }
+  .btns { display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
+  .btn { display:inline-block; padding:12px 22px; border-radius:10px; font-weight:600; text-decoration:none; }
+  .btn.primary { background:#7cc36f; color:#0e2415; }
+  .btn.ghost { border:1px solid #a9d7a0; color:#fff; }
+  section { padding:64px 0; }
+  h2 { font-size:1.7rem; margin:0 0 8px; color:var(--escuro); }
+  .lead { color:#4a5e51; margin:0 0 28px; max-width:640px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:18px; }
+  .card { background:#fff; border:1px solid #dfead8; border-radius:14px; padding:22px; box-shadow:0 6px 18px rgba(18,40,26,.06); }
+  .card h3 { margin:0 0 6px; font-size:1.05rem; color:var(--verde); }
+  .card p { margin:0; font-size:.95rem; color:#4a5e51; }
+  .alt { background:var(--claro); }
+  .steps { counter-reset:s; display:grid; gap:14px; padding:0; list-style:none; max-width:760px; }
+  .steps li { counter-increment:s; background:#fff; border:1px solid #dfead8; border-radius:12px; padding:14px 16px 14px 56px; position:relative; }
+  .steps li::before { content:counter(s); position:absolute; left:14px; top:12px; width:30px; height:30px; border-radius:50%; background:var(--verde); color:#fff; display:grid; place-items:center; font-weight:700; }
+  .aviso { background:#fff8e6; border:1px solid #f0dfa6; border-radius:12px; padding:14px 18px; max-width:760px; }
+  footer { background:var(--escuro); color:#b8cdb2; padding:26px 0; font-size:.9rem; }
+  footer .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; }
+  footer a { color:#cfe6c8; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="brand"><img src="static/img/logo-pedro-jefferson.png" alt="Logo Pedro e Jefferson Agro">AgroDados</span>
+    <a class="link" href="https://github.com/Pedro-Cruz-9-scop/AgroDados-JP">Código no GitHub ↗</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <small>GESTÃO RURAL INTEGRADA</small>
+    <h1>Gestão e rastreabilidade para a sua propriedade rural</h1>
+    <p>Propriedades, talhões no mapa, insumos, atividades e documentos organizados em um só lugar, com os dados de cada conta privados.</p>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/Pedro-Cruz-9-scop/AgroDados-JP#publica%C3%A7%C3%A3o-gratuita-no-github-e-render">Como publicar o sistema</a>
+      <a class="btn ghost" href="https://github.com/Pedro-Cruz-9-scop/AgroDados-JP">Ver o código</a>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>O que o AgroDados faz</h2>
+    <p class="lead">Um sistema web em Django para registrar e consultar o que acontece no campo.</p>
+    <div class="grid">
+      <div class="card"><h3>Propriedades</h3><p>Cadastro das unidades produtivas, área, cultura principal e responsável.</p></div>
+      <div class="card"><h3>Mapas e talhões</h3><p>Desenhe os limites no mapa de satélite e calcule a área de cada talhão.</p></div>
+      <div class="card"><h3>Produtos e insumos</h3><p>Inventário com categoria, quantidade e ligação com as atividades.</p></div>
+      <div class="card"><h3>Atividades agrícolas</h3><p>Histórico de plantio, adubação, defensivos, irrigação e colheita.</p></div>
+      <div class="card"><h3>Documentação</h3><p>CAR, CCIR, ITR, escrituras e comodatos guardados com acesso restrito.</p></div>
+      <div class="card"><h3>Relatórios</h3><p>Indicadores calculados só com os registros reais da sua conta.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <h2>Privacidade</h2>
+    <p class="lead">Cada usuário vê e altera somente o que cadastrou. A exclusão de qualquer registro exige a confirmação da senha. O administrador acessa o painel completo.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Colocar o sistema no ar</h2>
+    <p class="lead">Esta página é apenas uma apresentação: o GitHub Pages não executa Python, banco de dados ou login. O sistema roda no Render.</p>
+    <ol class="steps">
+      <li>Crie um PostgreSQL gratuito no Neon e copie a <code>DATABASE_URL</code>.</li>
+      <li>Crie um bucket privado no Cloudflare R2 para os documentos e fotos.</li>
+      <li>No Render, crie um <b>Blueprint</b> a partir deste repositório e preencha as variáveis secretas.</li>
+      <li>Depois do deploy, crie o primeiro usuário com <code>python manage.py createsuperuser</code>.</li>
+    </ol>
+    <p class="aviso" style="margin-top:22px">Passo a passo completo no <a href="https://github.com/Pedro-Cruz-9-scop/AgroDados-JP#readme">README do projeto</a>.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 AgroDados — Pedro e Jefferson Agro</span>
+    <span>Licença MIT · <a href="https://github.com/Pedro-Cruz-9-scop/AgroDados-JP">GitHub</a></span>
+  </div>
+</footer>
+</body>
+</html>
