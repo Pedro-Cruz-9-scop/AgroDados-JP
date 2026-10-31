@@ -48,6 +48,15 @@ O arquivo `.gitignore` exclui ambientes virtuais, segredos, banco SQLite, arquiv
 
 O workflow do GitHub Actions executa testes, checagem de migrações, coleta de arquivos estáticos e a verificação de produção ao enviar alterações ou abrir um pull request. Antes do primeiro commit, confira `git status` e confirme que `db.sqlite3`, `.venv/`, `venv/`, `.env` e `media/` não estão na lista.
 
+## Colocar no ar rápido (modo de teste)
+Para ver o site funcionando sem Neon nem R2, crie um *Web Service* no Render a partir do repositório e defina:
+
+- Build Command: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+- Start Command: `python manage.py migrate --noinput && python -m gunicorn agrodados.wsgi:application --workers 1 --threads 4 --timeout 120`
+- Variáveis: `DJANGO_DEBUG=0`, `DJANGO_SECRET_KEY` (valor aleatório longo), `DJANGO_ALLOWED_HOSTS=.onrender.com` e `ALLOW_EPHEMERAL_STORAGE=1`.
+
+Neste modo o banco SQLite e os arquivos ficam no disco temporário: **contas, registros, fotos e documentos são perdidos a cada reinício ou novo deploy**. Use só para testar. Para uso real, siga a seção abaixo.
+
 ## Publicação gratuita no GitHub e Render
 Este projeto é uma aplicação Django; **GitHub Pages não executa Python, banco de dados ou autenticação**. Use o GitHub para armazenar o código e o Render para executar o site. O arquivo `render.yaml` configura um serviço Web gratuito, sem disco persistente.
 

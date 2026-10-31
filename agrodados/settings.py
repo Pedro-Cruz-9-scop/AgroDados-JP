@@ -6,6 +6,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.environ.get('DJANGO_DEBUG', '0').lower() in {'1', 'true', 'yes'}
+# Apenas para testes: permite rodar no Render com SQLite e arquivos temporários (dados somem ao reiniciar).
+ALLOW_EPHEMERAL_STORAGE = os.environ.get('ALLOW_EPHEMERAL_STORAGE', '0').lower() in {
+    '1',
+    'true',
+    'yes',
+}
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or (
     'local-development-key-do-not-use-in-production' if DEBUG else ''
 )
@@ -62,7 +68,7 @@ if DATABASE_URL:
         )
     }
 else:
-    if not DEBUG and os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
+    if not DEBUG and os.environ.get('RENDER_EXTERNAL_HOSTNAME') and not ALLOW_EPHEMERAL_STORAGE:
         raise ImproperlyConfigured(
             'Configure DATABASE_URL com um PostgreSQL persistente antes de iniciar no Render.'
         )
@@ -87,7 +93,12 @@ if any(R2_STORAGE_SETTINGS.values()) and not R2_STORAGE_CONFIGURED:
         'Configure todas as variáveis R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, '
         'R2_BUCKET_NAME e R2_ENDPOINT_URL.'
     )
-if not DEBUG and os.environ.get('RENDER_EXTERNAL_HOSTNAME') and not R2_STORAGE_CONFIGURED:
+if (
+    not DEBUG
+    and os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    and not R2_STORAGE_CONFIGURED
+    and not ALLOW_EPHEMERAL_STORAGE
+):
     raise ImproperlyConfigured(
         'Configure o armazenamento persistente R2 antes de iniciar no Render.'
     )
