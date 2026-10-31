@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && gunicorn agrodados.wsgi:application --workers 1 --threads 4 --timeout 120
+web: sh -c '[ -f /opt/venv/bin/activate ] && . /opt/venv/bin/activate; python manage.py migrate --noinput && exec python -m gunicorn agrodados.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 120'

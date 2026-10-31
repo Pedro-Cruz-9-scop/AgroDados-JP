@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ["python312"]
+
+# O python do Nix não traz o módulo pip; o venv cria um pip próprio
+# (com get-pip.py como alternativa se o ensurepip não existir).
+[phases.install]
+cmds = [
+  "python3 -m venv /opt/venv || python3 -m venv --without-pip /opt/venv",
+  "/opt/venv/bin/python -m pip --version || (python3 -c \"import urllib.request; urllib.request.urlretrieve('https://bootstrap.pypa.io/get-pip.py', '/tmp/get-pip.py')\" && /opt/venv/bin/python /tmp/get-pip.py)",
+  "/opt/venv/bin/python -m pip install -r requirements.txt",
+]
+
+[phases.build]
+cmds = ["/opt/venv/bin/python manage.py collectstatic --noinput"]
+
+[start]
+cmd = "/opt/venv/bin/python manage.py migrate --noinput && exec /opt/venv/bin/python -m gunicorn agrodados.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 120"
