@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 
@@ -8,8 +9,9 @@ class FotoPerfilForm(forms.Form):
 
     def clean_foto(self):
         foto = self.cleaned_data.get('foto')
-        if foto and foto.size > 5 * 1024 * 1024:
-            raise ValidationError('A foto deve ter no máximo 5 MB.')
+        limite = min(5 * 1024 * 1024, settings.MAX_UPLOAD_BYTES)
+        if foto and foto.size > limite:
+            raise ValidationError(f'A foto deve ter no máximo {limite // (1024 * 1024)} MB.')
         if foto and foto.image.format not in {'JPEG', 'PNG', 'WEBP'}:
             raise ValidationError('Use uma imagem nos formatos JPG, PNG ou WEBP.')
         if foto and (

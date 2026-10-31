@@ -13,7 +13,7 @@
     <h1>Mapa e talhões</h1>
     <p>Visualize sua região, desenhe os limites e acompanhe cada área de cultivo.</p>
   </div>
-  <a class="btn primary" href="{% url 'propriedades' %}">＋ Cadastrar propriedade</a>
+  <a class="btn primary" href="{% url 'propriedades' %}"><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Cadastrar propriedade</a>
 </div>
 
 <div class="field-overview">
@@ -36,14 +36,14 @@
     <p class="map-status" id="mapStatus" role="status" aria-live="polite">Carregando mapa...</p>
 
     <div class="map-toolbar">
-      <button class="btn ghost" id="locateMe" type="button">◎ Minha localização</button>
+      <button class="btn ghost" id="locateMe" type="button"><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Minha localização</button>
       <button class="btn ghost" id="showWorld" type="button">Ver mapa mundial</button>
       {% if properties %}
-        <button class="btn secondary" id="startDrawing" type="button">＋ Desenhar talhão</button>
-        <button class="btn ghost" id="undoPoint" type="button" disabled>↶ Desfazer ponto</button>
+        <button class="btn secondary" id="startDrawing" type="button"><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Desenhar talhão</button>
+        <button class="btn ghost" id="undoPoint" type="button" disabled><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>Desfazer ponto</button>
         <button class="btn ghost" id="clearDrawing" type="button" disabled>Limpar desenho</button>
       {% else %}
-        <button id="startDrawing" disabled class="btn secondary" type="button">＋ Desenhar talhão</button>
+        <button id="startDrawing" disabled class="btn secondary" type="button"><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Desenhar talhão</button>
       {% endif %}
     </div>
 

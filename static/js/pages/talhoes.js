@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     drawing = false;
     points = [];
     redrawPreview();
-    startButton.textContent = "＋ Desenhar talhão";
+    startButton.innerHTML = '<svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Desenhar talhão';
     map.getContainer().style.cursor = "";
     status.textContent = "Desenho apagado. Inicie novamente ou escolha um talhão salvo.";
   };

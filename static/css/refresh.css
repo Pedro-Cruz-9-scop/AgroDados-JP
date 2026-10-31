@@ -1390,3 +1390,321 @@ textarea::placeholder {
     transition-duration: .01ms !important;
   }
 }
+
+/* Menu lateral rolável quando a janela é menor que o conteúdo */
+.sidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .25) transparent;
+}
+
+.sidebar > * {
+  flex-shrink: 0;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .25);
+  border-radius: 6px;
+}
+.nav a span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav a span svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+/* Rodapé do menu: cartão do usuário */
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 14px 0 0;
+  gap: 11px;
+  flex-wrap: wrap;
+}
+
+.sidebar-bottom .avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  font-size: 15px;
+  background: linear-gradient(145deg, #3b6a4a, #25472f);
+  border: 2px solid #9ac76e;
+  box-shadow: 0 0 0 3px rgba(154, 199, 110, .14);
+  overflow: hidden;
+}
+
+.sidebar-bottom .user-mini {
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.sidebar-bottom .user-mini b {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-bottom .user-mini small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7fd68f;
+  box-shadow: 0 0 0 3px rgba(127, 214, 143, .18);
+}
+
+.sidebar-bottom .logout-form {
+  width: 100%;
+}
+
+.sidebar-bottom .logout {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .04);
+  color: #d5e0d4;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .2s, border-color .2s, color .2s;
+}
+
+.sidebar-bottom .logout svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sidebar-bottom .logout:hover {
+  background: rgba(224, 108, 94, .14);
+  border-color: rgba(224, 108, 94, .45);
+  color: #ffb4a9;
+}
+
+/* Ícones SVG das páginas */
+svg.ico {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: -0.14em;
+}
+
+svg.ico-lead {
+  margin-right: 7px;
+}
+
+svg.ico-trail {
+  margin-left: 6px;
+}
+
+.metric-icon svg.ico,
+.table-icon svg.ico,
+.property-thumb svg.ico {
+  width: 1.15em;
+  height: 1.15em;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.trend svg.ico {
+  vertical-align: -0.16em;
+}
+
+.auth-feature > span svg.ico {
+  width: 15px;
+  height: 15px;
+}
+
+.mobile-menu svg.ico {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+.logout-icon svg.ico {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.modal-close svg.ico,
+.logo-lightbox svg.ico,
+[data-logo-lightbox] svg.ico {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.search-input {
+  padding-left: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d8c80' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+  background-size: 15px 15px;
+}
+
+/* Rodapé único do sistema */
+.site-footer {
+  position: relative;
+  border-top: 0;
+  background:
+    radial-gradient(ellipse at 12% 0, rgba(154, 199, 110, .22), transparent 55%),
+    linear-gradient(135deg, #1f4a31, #13291d 60%, #0d1d15);
+  color: #b8cbbc;
+  font-size: 12px;
+}
+
+.site-footer::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #9ac76e, #e0b949 55%, #9ac76e);
+  content: "";
+}
+
+.site-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px 34px;
+  flex-wrap: wrap;
+  padding: 30px clamp(22px, 3vw, 46px) 22px;
+}
+
+.sf-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sf-logo {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 2px solid #9ac76e;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #13231a;
+  box-shadow: 0 0 0 4px rgba(154, 199, 110, .16);
+}
+
+.sf-brand-text {
+  display: grid;
+  gap: 2px;
+}
+
+.sf-brand-text b {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sf-brand-text span {
+  color: #a9c2ae;
+  font-size: 12px;
+}
+
+.sf-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.sf-links a {
+  padding: 7px 12px;
+  border-radius: 9px;
+  color: #d3e3d5;
+  font-weight: 500;
+  transition: background .2s, color .2s;
+}
+
+.sf-links a:hover {
+  background: rgba(154, 199, 110, .18);
+  color: #fff;
+}
+
+.sf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: 1px solid rgba(154, 199, 110, .45);
+  border-radius: 999px;
+  background: rgba(154, 199, 110, .14);
+  color: #d8f0b8;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sf-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 24px;
+  flex-wrap: wrap;
+  padding: 15px clamp(22px, 3vw, 46px) 19px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  color: #8fa896;
+  font-size: 11px;
+}
+
+.site-footer--auth {
+  background:
+    radial-gradient(ellipse at 88% 0, rgba(224, 185, 73, .14), transparent 50%),
+    linear-gradient(135deg, #12301f, #0a1a12 65%, #050f0a);
+}
+
+/* Telas de login/cadastro: tela cheia menos a altura do rodapé */
+.auth-layout,
+.auth-visual,
+.auth-form-side {
+  min-height: calc(100vh - 140px);
+}
+@media (max-width: 720px) {
+  .site-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sf-bottom {
+    flex-direction: column;
+  }
+
+  .auth-layout,
+  .auth-visual,
+  .auth-form-side {
+    min-height: 0;
+  }
+}
+
+/* Logo AgroDados */
+.brand-logo, .sf-logo {
+  object-fit: contain;
+  background: #fff;
+  border: 2px solid #fff;
+  padding: 1px;
+}
+.brand-logo { box-shadow: 0 5px 18px rgba(20, 60, 35, .22); }
+.sf-logo { border-color: #9ac76e; }

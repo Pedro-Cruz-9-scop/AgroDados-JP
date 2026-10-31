@@ -4,17 +4,19 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Count, Q, Sum
-from django.http import FileResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import FotoPerfilForm
 from .models import (
+    ArquivoArmazenado,
     Atividade,
     DocumentoPropriedade,
     Insumo,
@@ -420,6 +422,7 @@ def perfil(request):
         {
             'properties': Propriedade.objects.filter(proprietario=request.user),
             'user_profile': user_profile,
+            'max_photo_mb': min(5, settings.MAX_UPLOAD_BYTES // (1024 * 1024)),
         },
     )
 
@@ -476,8 +479,8 @@ def documentos(request):
         arquivo = request.FILES.get('arquivo')
         if not propriedade or not arquivo:
             messages.error(request, 'Selecione uma propriedade e um arquivo.')
-        elif arquivo.size > 15 * 1024 * 1024:
-            messages.error(request, 'O arquivo deve ter no máximo 15 MB.')
+        elif arquivo.size > settings.MAX_UPLOAD_BYTES:
+            messages.error(request, f'O arquivo deve ter no máximo {settings.MAX_UPLOAD_BYTES // (1024 * 1024)} MB.')
         elif arquivo.content_type not in ['application/pdf', 'image/jpeg', 'image/png']:
             messages.error(request, 'Envie um PDF, JPG ou PNG.')
         elif request.POST.get('categoria') not in dict(DocumentoPropriedade.CATEGORIAS):
@@ -510,9 +513,35 @@ def documentos(request):
             'properties': propriedades,
             'documents': docs,
             'selected_property': selected_property,
+            'max_upload_mb': settings.MAX_UPLOAD_BYTES // (1024 * 1024),
         },
     )
 
+
+@login_required
+def media_arquivo(request, caminho):
+    """Entrega fotos e documentos guardados no banco, só para quem tem acesso."""
+    caminho = caminho.replace('\\', '/')
+    if '..' in caminho.split('/'):
+        raise Http404
+    if caminho.startswith('fotos_perfil/'):
+        permitido = request.user.is_staff or PerfilUsuario.objects.filter(
+            usuario=request.user, foto=caminho
+        ).exists()
+    elif caminho.startswith('documentos_propriedades/'):
+        documentos = DocumentoPropriedade.objects.filter(arquivo=caminho)
+        if not request.user.has_perm('core.view_documentopropriedade'):
+            documentos = documentos.filter(propriedade__proprietario=request.user)
+        permitido = documentos.exists()
+    else:
+        permitido = False
+    if not permitido:
+        raise Http404
+    registro = get_object_or_404(ArquivoArmazenado, nome=caminho)
+    resposta = HttpResponse(bytes(registro.conteudo), content_type=registro.tipo_conteudo)
+    resposta['Cache-Control'] = 'private, max-age=3600'
+    resposta['X-Content-Type-Options'] = 'nosniff'
+    return resposta
 
 @login_required
 def download_documento(request, documento_id):

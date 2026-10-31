@@ -2,7 +2,7 @@
 {% block content %}
 <div class="page-heading"><div><span class="eyebrow">ARQUIVO RURAL DIGITAL</span><h1>Documentação da propriedade</h1><p>Centralize CAR, CCIR, ITR, contratos e demais arquivos de cada imóvel.</p></div></div>
 <div class="dashboard-grid documents-layout">
-<section class="panel"><div class="panel-heading"><div><span class="eyebrow">NOVO ARQUIVO</span><h2>Adicionar documento</h2><p>PDF, JPG ou PNG • até 15 MB</p></div></div>
+<section class="panel"><div class="panel-heading"><div><span class="eyebrow">NOVO ARQUIVO</span><h2>Adicionar documento</h2><p>PDF, JPG ou PNG • até {{ max_upload_mb }} MB</p></div></div>
 <form method="post" enctype="multipart/form-data" class="form-grid document-upload-form">{% csrf_token %}
 <label>Propriedade<select name="propriedade" required><option value="">Selecione</option>{% for p in properties %}<option value="{{ p.id }}" {% if selected_property.pk == p.pk %}selected{% endif %}>{{ p.nome }} — {{ p.municipio }}</option>{% endfor %}</select></label>
 <label>Tipo de documento<select name="categoria" data-document-category-select><option value="CAR">CAR</option><option value="CCIR">CCIR</option><option value="ITR">ITR</option><option value="Comodato">Comodato</option><option value="Escritura">Escritura</option><option value="Outro">Outro</option></select><span class="document-category-preview" data-document-category-preview aria-live="polite"><span class="document-type-logo document-type-logo--car" data-document-category-logo data-logo-src-car="{% static 'img/logo-car.png' %}?v=2" data-logo-src-ccir="{% static 'img/logo-ccir.png' %}" data-logo-src-comodato="{% static 'img/logo-comodato.png' %}" data-logo-src-escritura="{% static 'img/logo-escritura.png' %}" data-logo-src-itr="{% static 'img/logo-itr.png' %}" data-logo-src-outro="{% static 'img/logo-outro.png' %}">CAR</span><span data-document-category-label>Cadastro Ambiental Rural</span></span></label>
@@ -11,7 +11,7 @@
 <label>Data de emissão<input type="date" name="emitido_em"></label><label>Validade<input type="date" name="validade"></label>
 <label class="full">Arquivo<input type="file" name="arquivo" accept=".pdf,.jpg,.jpeg,.png" required></label>
 <label class="full">Observações<textarea name="observacoes" rows="3" placeholder="Informações adicionais"></textarea></label>
-<div class="full"><button class="btn primary" type="submit">＋ Anexar documento</button></div></form></section>
+<div class="full"><button class="btn primary" type="submit"><svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Anexar documento</button></div></form></section>
 <section class="panel documents-panel"><div class="panel-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h2>Documentos cadastrados</h2><p>{{ documents|length }} arquivo(s) armazenado(s)</p></div></div>
 <div class="activity-list document-grid">
 {% for d in documents %}
@@ -26,7 +26,7 @@
     <small>Enviado em {{ d.enviado_em|date:"d/m/Y" }}{% if d.validade %} · Validade {{ d.validade|date:"d/m/Y" }}{% endif %}</small>
   </div>
   <div class="document-actions">
-    <a class="btn ghost" href="{% url 'core:download_documento' d.pk %}">Baixar ↧</a>
+    <a class="btn ghost" href="{% url 'core:download_documento' d.pk %}">Baixar<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/></svg></a>
     <form method="post" action="{% url 'core:excluir_documento' d.pk %}" class="delete-document-form" data-delete-document-form>
       {% csrf_token %}
       <button class="btn ghost delete-document-button" type="button" data-open-delete aria-expanded="false" aria-label="Excluir {{ d.titulo }}">Excluir</button>
@@ -45,7 +45,7 @@
 {% endfor %}
 </div>
 <dialog class="logo-lightbox" data-logo-lightbox aria-label="Visualização ampliada da logo">
-  <button class="logo-lightbox-close" type="button" data-close-logo-lightbox aria-label="Fechar visualização">×</button>
+  <button class="logo-lightbox-close" type="button" data-close-logo-lightbox aria-label="Fechar visualização"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   <img data-logo-lightbox-image alt="">
 </dialog>
 </section></div>

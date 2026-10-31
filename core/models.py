@@ -126,3 +126,18 @@ class DocumentoPropriedade(models.Model):
 
     def __str__(self):
         return f'{self.categoria} — {self.propriedade.nome}'
+
+class ArquivoArmazenado(models.Model):
+    """Arquivo enviado guardado no banco (usado quando não há disco persistente)."""
+
+    nome = models.CharField(max_length=255, unique=True)
+    conteudo = models.BinaryField()
+    tipo_conteudo = models.CharField(max_length=120, default='application/octet-stream')
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'arquivo armazenado'
+        verbose_name_plural = 'arquivos armazenados'
+
+    def __str__(self):
+        return self.nome

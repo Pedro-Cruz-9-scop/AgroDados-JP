@@ -6,44 +6,63 @@
 
 .profile-card,
 .profile-side > .panel {
-    border: 1px solid #e6ece3;
-    border-radius: 18px;
+    border: 1px solid #e3ebdf;
+    border-radius: 26px;
     background: #fff;
-    box-shadow: 0 10px 28px rgba(37, 57, 39, .06);
+    box-shadow: 0 16px 40px rgba(37, 57, 39, .08);
+}
+
+.profile-side > .panel {
+    transition: transform .25s, box-shadow .25s;
+}
+
+.profile-side > .panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 44px rgba(37, 57, 39, .12);
 }
 
 .profile-card {
     overflow: hidden;
 }
 
+.profile-grid .profile-card {
+    padding: 14px 14px 6px;
+}
+
 .profile-card .profile-cover {
-    height: 174px;
+    height: clamp(180px, 22vw, 214px);
     border: 0;
-    border-radius: 0;
+    border-radius: 22px;
     background-position: center 57%;
+    box-shadow: 0 14px 30px rgba(28, 56, 34, .22);
 }
 
 .profile-card .profile-cover::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(12, 31, 20, .04), rgba(12, 31, 20, .24));
+    border-radius: inherit;
+    background:
+        linear-gradient(180deg, rgba(12, 31, 20, 0) 45%, rgba(12, 31, 20, .45)),
+        linear-gradient(120deg, rgba(154, 199, 110, .16), transparent 55%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18);
 }
 
 .profile-main {
     align-items: center;
-    gap: 14px;
-    margin-top: -30px;
-    padding: 0 24px;
+    gap: 16px;
+    margin-top: -34px;
+    padding: 0 22px;
 }
 
 .profile-avatar {
-    flex: 0 0 64px;
-    width: 64px;
-    height: 64px;
+    flex: 0 0 76px;
+    width: 76px;
+    height: 76px;
     border: 4px solid #fff;
-    border-radius: 19px;
-    font-size: 22px;
+    border-radius: 24px;
+    font-size: 26px;
+    box-shadow: 0 10px 24px rgba(28, 56, 34, .24), 0 0 0 3px rgba(154, 199, 110, .35);
 }
 
 .profile-avatar img {
@@ -66,37 +85,41 @@
 
 .profile-title {
     min-width: 0;
-    padding-top: 21px;
+    padding-top: 38px;
 }
 
 .profile-title h2 {
     margin: 0 0 8px;
     overflow-wrap: anywhere;
-    font-size: 19px;
+    font-size: 21px;
+    letter-spacing: -.3px;
 }
 
 .role-chip {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
-    padding: 4px 10px;
+    min-height: 26px;
+    padding: 4px 12px;
     border-radius: 999px;
-    font-weight: 600;
+    background: linear-gradient(135deg, #e4f2dd, #d4e9cb);
+    border-color: #bfdcb4;
+    color: #2f6a3b;
+    font-weight: 700;
 }
 
 .profile-details {
     gap: 16px;
-    padding: 23px 24px 24px;
+    padding: 24px 22px 22px;
 }
 
 .profile-photo-form {
     display: grid;
     gap: 14px;
-    margin: 20px 24px 0;
-    padding: 16px;
-    border: 1px solid #e8eee5;
-    border-radius: 14px;
-    background: #fbfcfa;
+    margin: 22px 8px 0;
+    padding: 18px;
+    border: 1px solid #dfe9db;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fbfdf9, #f3f8ef);
 }
 
 .profile-photo-form .profile-field input[type="file"] {
@@ -121,11 +144,32 @@
 .profile-field input[type="file"] {
     min-height: 46px;
     padding: 8px;
-    border: 1px dashed #cbd9c8;
-    border-radius: 11px;
+    border: 1px dashed #b9d0b4;
+    border-radius: 14px;
     background: #f8faf7;
     color: #526457;
     font-size: 12px;
+}
+
+.profile-field input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2f7d4a, #236a3c);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter .2s;
+}
+
+.profile-field input[type="file"]::file-selector-button:hover {
+    filter: brightness(1.1);
+}
+
+.profile-field input:not([type="file"]) {
+    border-radius: 13px;
 }
 
 .profile-field small {
@@ -239,20 +283,21 @@
 
     .profile-card .profile-cover {
         height: 150px;
+        border-radius: 18px;
     }
 
     .profile-main {
-        padding-right: 18px;
-        padding-left: 18px;
+        padding-right: 10px;
+        padding-left: 10px;
     }
 
     .profile-details {
-        padding: 20px 18px;
+        padding: 20px 10px;
     }
 
     .profile-photo-form {
-        margin-right: 18px;
-        margin-left: 18px;
+        margin-right: 0;
+        margin-left: 0;
         padding: 14px;
     }
 

@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (heading) heading.textContent = labels[typeSelect.value] || "Relatório";
     if (resultCount) resultCount.textContent = `${visibleRows} registro(s)`;
-    exportButton.textContent = `⇩ Exportar ${labels[typeSelect.value] || "relatório"} CSV`;
+    exportButton.innerHTML = `<svg class="ico ico-lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>Exportar ${labels[typeSelect.value] || "relatório"} CSV`;
   };
 
   applyButton.addEventListener("click", applyFilters);

@@ -72,7 +72,8 @@ class ApplicationNavigationTests(TestCase):
         dashboard = self.client.get(reverse('core:dashboard'))
         self.assertContains(dashboard, 'css/refresh.css')
         self.assertContains(dashboard, 'img/plantacao-campos.jpg')
-        self.assertContains(dashboard, 'Johny Goerend')
+        self.assertNotContains(dashboard, 'Johny Goerend')
+        self.assertContains(dashboard, 'img/logo-agrodados.png')
 
         self.client.logout()
         login_page = self.client.get(reverse('core:login'))
@@ -790,3 +791,21 @@ class ApplicationNavigationTests(TestCase):
 
         self.assertContains(response, 'Ainda não tem acesso? Criar conta')
         self.assertNotContains(response, 'use o painel sem login')
+
+
+class SiteFooterTests(TestCase):
+    def test_footer_appears_on_login_and_signup_pages(self):
+        for name in ('login', 'cadastro'):
+            with self.subTest(page=name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, 'site-footer--auth')
+                self.assertContains(response, 'Informação que fortalece o campo.')
+
+    def test_footer_appears_on_internal_pages_with_shortcuts(self):
+        user = User.objects.create_user(username='rodape', password='senha-de-teste-123')
+        self.client.force_login(user)
+        for name in ('dashboard', 'propriedades', 'documentos', 'relatorios', 'perfil'):
+            with self.subTest(page=name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, 'site-footer--app')
+                self.assertContains(response, 'Atalhos do rodapé')

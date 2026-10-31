@@ -29,9 +29,9 @@
         <h3>Propriedades</h3>
         {% for property in properties %}
           <a class="search-result" href="{% url 'core:documentos' %}?propriedade={{ property.id }}">
-            <span class="metric-icon green">⌂</span>
+            <span class="metric-icon green"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
             <span><b>{{ property.nome }}</b><small>{{ property.municipio|default:"Município não informado" }} · {{ property.area_hectares }} ha</small></span>
-            <span class="text-link">Ver documentos →</span>
+            <span class="text-link">Ver documentos<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         {% endfor %}
       </section>
@@ -41,9 +41,9 @@
         <h3>Talhões</h3>
         {% for field in fields %}
           <a class="search-result" href="{% url 'core:talhoes' %}">
-            <span class="metric-icon green">▧</span>
+            <span class="metric-icon green"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6.5v14L9 18l6 2.5 6-2.5v-14L15 6.5z"/><path d="M9 4v14M15 6.5v14"/></svg></span>
             <span><b>{{ field.nome }}</b><small>{{ field.propriedade.nome }} · {{ field.cultura|default:"Cultura não informada" }} · {{ field.area_hectares }} ha</small></span>
-            <span class="text-link">Ver mapa →</span>
+            <span class="text-link">Ver mapa<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         {% endfor %}
       </section>
@@ -53,9 +53,9 @@
         <h3>Atividades</h3>
         {% for activity in activities %}
           <a class="search-result" href="{% url 'core:atividades' %}?propriedade={{ activity.propriedade|urlencode }}">
-            <span class="metric-icon blue">◷</span>
+            <span class="metric-icon blue"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="m9 15.5 2 2 4-4"/></svg></span>
             <span><b>{{ activity.tipo }} · {{ activity.talhao }}</b><small>{{ activity.propriedade }} · {{ activity.cultura }} · {{ activity.data|date:"d/m/Y" }}</small></span>
-            <span class="text-link">Ver histórico →</span>
+            <span class="text-link">Ver histórico<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         {% endfor %}
       </section>
@@ -65,9 +65,9 @@
         <h3>Produtos e insumos</h3>
         {% for input in inputs %}
           <a class="search-result" href="{% url 'core:insumos' %}?q={{ input.nome|urlencode }}">
-            <span class="metric-icon amber">♧</span>
+            <span class="metric-icon amber"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="M12 11C12 7 9 4.5 4 4.5c0 4.5 2.5 6.5 8 6.5Z"/><path d="M12 14c0-3.5 2.5-6 8-6 0 4.5-2.5 6.5-8 6.5"/></svg></span>
             <span><b>{{ input.nome }}</b><small>{{ input.categoria }} · {{ input.quantidade }} {{ input.unidade }}</small></span>
-            <span class="text-link">Abrir inventário →</span>
+            <span class="text-link">Abrir inventário<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         {% endfor %}
       </section>
@@ -77,23 +77,23 @@
         <h3>Documentos</h3>
         {% for document in documents %}
           <a class="search-result" href="{% url 'core:documentos' %}?propriedade={{ document.propriedade_id }}">
-            <span class="metric-icon violet">▤</span>
+            <span class="metric-icon violet"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span>
             <span><b>{{ document.titulo }}</b><small>{{ document.get_categoria_display }} · {{ document.propriedade.nome }}</small></span>
-            <span class="text-link">Abrir documentos →</span>
+            <span class="text-link">Abrir documentos<svg class="ico ico-trail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
           </a>
         {% endfor %}
       </section>
     {% endif %}
   {% else %}
     <div class="panel empty-state">
-      <span class="metric-icon amber">⌕</span>
+      <span class="metric-icon amber"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
       <h2>Nenhum resultado encontrado</h2>
       <p>Tente outro nome de propriedade, cultura, talhão, produto ou documento.</p>
     </div>
   {% endif %}
 {% else %}
   <div class="panel empty-state">
-    <span class="metric-icon green">⌕</span>
+    <span class="metric-icon green"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
     <h2>Pesquise em todos os seus registros</h2>
     <p>Os resultados ficam limitados aos dados vinculados à sua conta.</p>
   </div>

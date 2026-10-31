@@ -1,0 +1,26 @@
+{% load static %}
+<footer class="site-footer site-footer--{{ variant|default:'app' }}">
+  <div class="site-footer-inner">
+    <div class="sf-brand">
+      <img class="sf-logo" src="{% static 'img/logo-agrodados.png' %}" alt="" width="40" height="40">
+      <div class="sf-brand-text">
+        <b>AgroDados</b>
+        <span>Informação que fortalece o campo.</span>
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+    <nav class="sf-links" aria-label="Atalhos do rodapé">
+      <a href="{% url 'dashboard' %}">Visão geral</a>
+      <a href="{% url 'propriedades' %}">Propriedades</a>
+      <a href="{% url 'talhoes' %}">Mapas e talhões</a>
+      <a href="{% url 'documentos' %}">Documentação</a>
+      <a href="{% url 'relatorios' %}">Relatórios</a>
+    </nav>
+    {% endif %}
+    <div class="sf-badge"><i class="status-dot" aria-hidden="true"></i>Gestão rural integrada</div>
+  </div>
+  <div class="sf-bottom">
+    <span>© {% now "Y" %} AgroDados. Todos os direitos reservados.</span>
+    <span>Gestão &amp; rastreabilidade agrícola</span>
+  </div>
+</footer>
